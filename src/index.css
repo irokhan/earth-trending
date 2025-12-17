@@ -1,0 +1,30 @@
+:root {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #ffffff;
+  background-color: #050915;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.05), transparent 25%),
+    radial-gradient(circle at 80% 10%, rgba(255, 0, 180, 0.05), transparent 20%),
+    #050915;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+}
+
+a {
+  color: inherit;
+}
