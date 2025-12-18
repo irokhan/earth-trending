@@ -384,11 +384,9 @@ export default function App() {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [displayedStory, setDisplayedStory] = useState('');
-  const [captionCycle, setCaptionCycle] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeReqRef = useRef<number | null>(null);
   const pickerOpenRef = useRef(false);
-  const storyIntervalRef = useRef<number | null>(null);
 
 
   // --- Animation Refs ---
@@ -466,50 +464,8 @@ export default function App() {
   }, [panelVisible, audioUnlocked]);
 
   useEffect(() => {
-    if (storyIntervalRef.current) {
-      clearInterval(storyIntervalRef.current);
-      storyIntervalRef.current = null;
-    }
-
-    const story = storyData?.tracks[currentTrackIndex]?.story;
-    if (!story) {
-      setDisplayedStory('');
-      return;
-    }
-
-    const words = story.split(' ');
-    const chunkSize = Math.max(3, Math.floor(words.length / 8));
-    const captionChunks: string[] = [];
-
-    for (let i = 0; i < words.length; i += chunkSize) {
-      captionChunks.push(words.slice(i, i + chunkSize).join(' '));
-    }
-
-    setDisplayedStory(captionChunks[0] || story);
-    setCaptionCycle((c) => c + 1);
-
-    let pointer = 1;
-
-    storyIntervalRef.current = window.setInterval(() => {
-      if (pointer < captionChunks.length) {
-        setDisplayedStory(captionChunks[pointer]);
-        setCaptionCycle((c) => c + 1);
-        pointer += 1;
-        return;
-      }
-
-      if (storyIntervalRef.current) {
-        clearInterval(storyIntervalRef.current);
-        storyIntervalRef.current = null;
-      }
-    }, 420);
-
-    return () => {
-      if (storyIntervalRef.current) {
-        clearInterval(storyIntervalRef.current);
-        storyIntervalRef.current = null;
-      }
-    };
+    const story = storyData?.tracks[currentTrackIndex]?.story ?? '';
+    setDisplayedStory(story);
   }, [storyData, currentTrackIndex]);
 
 
@@ -994,21 +950,20 @@ export default function App() {
 
 
         {/* Content */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 30, position: 'relative', zIndex: 5, background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%)' }}>
-          <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', fontSize: 120, opacity: 0.1, filter: 'blur(2px)', zIndex: 1 }}>🎵</div>
+        <div className="story-content">
+          <div className="story-meta">
+            <div className="story-cover" aria-hidden="true">🎵</div>
+            <div className="story-meta__text">
+              <div className="story-meta__title">{storyData?.tracks[currentTrackIndex].song}</div>
+              <div className="story-meta__artist">{storyData?.tracks[currentTrackIndex].artist}</div>
+            </div>
+          </div>
 
-          <div style={{ background: '#1DB954', color: 'black', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px 8px', borderRadius: 4, alignSelf: 'flex-start', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1, zIndex: 2 }}>
-            Trending #{currentTrackIndex + 1}
-          </div>
-          <div className="story-caption" style={{ marginBottom: 16, zIndex: 2 }}>
+          <div className="story-trending">Trending #{currentTrackIndex + 1}</div>
+
+          <div className="story-caption story-caption--scroll">
             <span className="story-caption__signal" aria-hidden="true" />
-            <span key={captionCycle} className="story-caption__text">{displayedStory || storyData?.tracks[currentTrackIndex].story}</span>
-          </div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.1, marginBottom: 8, textShadow: '0 2px 4px rgba(0,0,0,0.5)', zIndex: 2 }}>
-            {storyData?.tracks[currentTrackIndex].song}
-          </div>
-          <div style={{ fontSize: '1.1rem', opacity: 0.9, marginBottom: 6, fontWeight: 500, zIndex: 2 }}>
-            {storyData?.tracks[currentTrackIndex].artist}
+            <span className="story-caption__text">{displayedStory || storyData?.tracks[currentTrackIndex].story}</span>
           </div>
         </div>
 
