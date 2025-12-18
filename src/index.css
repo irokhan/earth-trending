@@ -298,7 +298,7 @@ a {
 
 .story-caption {
   position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 10px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
@@ -309,6 +309,9 @@ a {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   overflow: hidden;
   isolation: isolate;
+  min-height: 72px;
+  max-height: 96px;
+  width: 100%;
 }
 
 .story-caption::after {
@@ -336,6 +339,10 @@ a {
   font-size: 1rem;
   opacity: 0.95;
   z-index: 1;
+  display: block;
+  width: 100%;
+  line-height: 1.4;
+  animation: captionIn 0.35s ease;
 }
 
 @keyframes captionPulse {
@@ -348,4 +355,9 @@ a {
   0% { transform: translateX(-80%); }
   50% { transform: translateX(10%); }
   100% { transform: translateX(80%); }
+}
+
+@keyframes captionIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
