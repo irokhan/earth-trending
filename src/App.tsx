@@ -387,6 +387,7 @@ export default function App() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeReqRef = useRef<number | null>(null);
   const pickerOpenRef = useRef(false);
+  const storyCardRef = useRef<HTMLDivElement | null>(null);
 
 
   // --- Animation Refs ---
@@ -856,8 +857,7 @@ export default function App() {
   };
 
 
-  const nextTrack = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const nextTrack = () => {
     if (storyData && currentTrackIndex < storyData.tracks.length - 1) {
       setCurrentTrackIndex(p => p + 1);
     } else {
@@ -866,9 +866,26 @@ export default function App() {
   };
 
 
-  const prevTrack = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const prevTrack = () => {
     if (currentTrackIndex > 0) setCurrentTrackIndex(p => p - 1);
+  };
+
+  const handleStoryCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!storyData) return;
+
+    // Ignore clicks on controls like the close button
+    if ((e.target as HTMLElement).closest('[data-skip-story-nav]')) return;
+
+    const rect = storyCardRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0) return;
+
+    const relativeX = (e.clientX - rect.left) / rect.width;
+    if (relativeX <= 0.3) {
+      prevTrack();
+      return;
+    }
+
+    nextTrack();
   };
 
   const handleIntroStart = () => {
@@ -921,14 +938,16 @@ export default function App() {
       {/* Story Card */}
       <div
         id="storyCard"
+        ref={storyCardRef}
         className={panelVisible ? 'active' : ''}
+        onClick={handleStoryCardClick}
         style={{
           position: 'absolute', top: '50%', right: '5%', transform: panelVisible ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(50px)',
           width: 320, height: 580, background: 'linear-gradient(135deg, rgba(10,10,10,0.95) 0%, rgba(30,30,30,0.95) 100%)',
           backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16,
           boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
           opacity: panelVisible ? 1 : 0, visibility: panelVisible ? 'visible' : 'hidden',
-          display: 'flex', flexDirection: 'column', overflow: 'hidden', userSelect: 'none'
+          display: 'flex', flexDirection: 'column', overflow: 'hidden', userSelect: 'none', cursor: 'pointer'
         }}
       >
         {/* Progress Bars */}
@@ -945,7 +964,13 @@ export default function App() {
         <div style={{ display: 'flex', alignItems: 'center', padding: 12, zIndex: 10 }}>
           <span style={{ fontSize: 24, marginRight: 10 }}>{storyData?.flag}</span>
           <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{storyData?.name}</span>
-          <button onClick={closeStory} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer', opacity: 0.7 }}>×</button>
+          <button
+            data-skip-story-nav
+            onClick={(e) => { e.stopPropagation(); closeStory(); }}
+            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer', opacity: 0.7 }}
+          >
+            ×
+          </button>
         </div>
 
 
@@ -968,9 +993,6 @@ export default function App() {
         </div>
 
 
-        {/* Tap Zones */}
-        <div onClick={prevTrack} style={{ position: 'absolute', top: 0, left: 0, width: '30%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
-        <div onClick={nextTrack} style={{ position: 'absolute', top: 0, right: 0, width: '70%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
       </div>
 
       {pickerOpen && (
