@@ -370,6 +370,8 @@ export default function App() {
  const [storyData, setStoryData] = useState<StoryData>(null);
  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
  const [panelVisible, setPanelVisible] = useState(false);
+ const [introVisible, setIntroVisible] = useState(true);
+ const [audioUnlocked, setAudioUnlocked] = useState(false);
  const audioRef = useRef<HTMLAudioElement | null>(null);
  const fadeReqRef = useRef<number | null>(null);
 
@@ -429,45 +431,20 @@ export default function App() {
   audio.muted = true; // allow autoplay in browsers that block sound until interaction
   audioRef.current = audio;
 
-   const startPlayback = () => {
-     audio.play()
-       .then(() => {
-         audio.muted = false;
-         fadeAudioTo(BASE_AUDIO_VOLUME, 700);
-       })
-       .catch(() => {
-         // Fallback: wait for a user gesture
-         window.addEventListener('pointerdown', unlockAudio);
-         window.addEventListener('touchstart', unlockAudio);
-       });
-   };
-
-   const unlockAudio = () => {
-     audio.play().then(() => {
-       audio.muted = false;
-       fadeAudioTo(BASE_AUDIO_VOLUME, 700);
-     }).catch(() => {});
-     window.removeEventListener('pointerdown', unlockAudio);
-     window.removeEventListener('touchstart', unlockAudio);
-   };
-
-   startPlayback();
-
    return () => {
      if (fadeReqRef.current) cancelAnimationFrame(fadeReqRef.current);
-     window.removeEventListener('pointerdown', unlockAudio);
-     window.removeEventListener('touchstart', unlockAudio);
      audio.pause();
    };
  }, []);
 
  useEffect(() => {
+   if (!audioUnlocked) return;
    if (!panelVisible) {
      fadeAudioTo(BASE_AUDIO_VOLUME, 700);
    } else {
      fadeAudioTo(0, 500);
    }
- }, [panelVisible]);
+ }, [panelVisible, audioUnlocked]);
 
 
  useEffect(() => {
@@ -874,9 +851,39 @@ export default function App() {
    if(currentTrackIndex > 0) setCurrentTrackIndex(p => p - 1);
  };
 
+ const handleIntroStart = () => {
+   if (audioUnlocked) {
+     setIntroVisible(false);
+     return;
+   }
+
+   const audio = audioRef.current;
+   if (!audio) return;
+
+   audio.play()
+     .then(() => {
+       audio.muted = false;
+       setAudioUnlocked(true);
+       fadeAudioTo(BASE_AUDIO_VOLUME, 700);
+       setIntroVisible(false);
+     })
+     .catch(() => {});
+ };
+
 
  return (
     <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', background: 'radial-gradient(circle at 50% 50%, #1a1a2e 0%, #16213e 40%, #0f0f1a 100%)', color: 'white', fontFamily: 'sans-serif' }}>
+     <div className={`intro-overlay ${introVisible ? 'show' : 'hide'}`}>
+       <div className="intro-noise" aria-hidden="true" />
+       <div className="intro-content">
+         <div className="intro-glitch" aria-hidden="true">Listen to the world</div>
+         <div className="intro-title">Listen to the world</div>
+         <p className="intro-subtitle">Signal locked. Tap to tune into the planet&apos;s pulse.</p>
+        <button className="intro-button" onClick={handleIntroStart} type="button">
+          <span className="intro-arrow">➜</span>
+        </button>
+       </div>
+     </div>
      <canvas ref={canvasRef} style={{ display: 'block' }} />
     
      {/* Instructions */}
