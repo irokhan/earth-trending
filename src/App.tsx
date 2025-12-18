@@ -384,6 +384,7 @@ export default function App() {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [displayedStory, setDisplayedStory] = useState('');
+  const [captionCycle, setCaptionCycle] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeReqRef = useRef<number | null>(null);
   const pickerOpenRef = useRef(false);
@@ -476,24 +477,32 @@ export default function App() {
       return;
     }
 
-    const chunks = story.split(' ');
-    const chunkSize = Math.max(3, Math.floor(chunks.length / 6));
-    let pointer = chunkSize;
+    const words = story.split(' ');
+    const chunkSize = Math.max(3, Math.floor(words.length / 8));
+    const captionChunks: string[] = [];
 
-    setDisplayedStory(chunks.slice(0, chunkSize).join(' '));
+    for (let i = 0; i < words.length; i += chunkSize) {
+      captionChunks.push(words.slice(i, i + chunkSize).join(' '));
+    }
+
+    setDisplayedStory(captionChunks[0] || story);
+    setCaptionCycle((c) => c + 1);
+
+    let pointer = 1;
 
     storyIntervalRef.current = window.setInterval(() => {
-      pointer += chunkSize;
-      const nextText = chunks.slice(0, pointer).join(' ');
-      setDisplayedStory(nextText);
-
-      if (pointer >= chunks.length) {
-        if (storyIntervalRef.current) {
-          clearInterval(storyIntervalRef.current);
-          storyIntervalRef.current = null;
-        }
+      if (pointer < captionChunks.length) {
+        setDisplayedStory(captionChunks[pointer]);
+        setCaptionCycle((c) => c + 1);
+        pointer += 1;
+        return;
       }
-    }, 260);
+
+      if (storyIntervalRef.current) {
+        clearInterval(storyIntervalRef.current);
+        storyIntervalRef.current = null;
+      }
+    }, 420);
 
     return () => {
       if (storyIntervalRef.current) {
@@ -993,7 +1002,7 @@ export default function App() {
           </div>
           <div className="story-caption" style={{ marginBottom: 16, zIndex: 2 }}>
             <span className="story-caption__signal" aria-hidden="true" />
-            <span className="story-caption__text">{displayedStory || storyData?.tracks[currentTrackIndex].story}</span>
+            <span key={captionCycle} className="story-caption__text">{displayedStory || storyData?.tracks[currentTrackIndex].story}</span>
           </div>
           <div style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.1, marginBottom: 8, textShadow: '0 2px 4px rgba(0,0,0,0.5)', zIndex: 2 }}>
             {storyData?.tracks[currentTrackIndex].song}
