@@ -383,9 +383,11 @@ export default function App() {
  const [introVisible, setIntroVisible] = useState(true);
  const [audioUnlocked, setAudioUnlocked] = useState(false);
  const [pickerOpen, setPickerOpen] = useState(false);
+ const [displayedStory, setDisplayedStory] = useState('');
  const audioRef = useRef<HTMLAudioElement | null>(null);
  const fadeReqRef = useRef<number | null>(null);
  const pickerOpenRef = useRef(false);
+ const storyIntervalRef = useRef<number | null>(null);
 
 
  // --- Animation Refs ---
@@ -461,6 +463,45 @@ export default function App() {
      fadeAudioTo(0, 500);
    }
  }, [panelVisible, audioUnlocked]);
+
+ useEffect(() => {
+   if (storyIntervalRef.current) {
+     clearInterval(storyIntervalRef.current);
+     storyIntervalRef.current = null;
+   }
+
+   const story = storyData?.tracks[currentTrackIndex]?.story;
+   if (!story) {
+     setDisplayedStory('');
+     return;
+   }
+
+   const chunks = story.split(' ');
+   const chunkSize = Math.max(3, Math.floor(chunks.length / 6));
+   let pointer = chunkSize;
+
+   setDisplayedStory(chunks.slice(0, chunkSize).join(' '));
+
+   storyIntervalRef.current = window.setInterval(() => {
+     pointer += chunkSize;
+     const nextText = chunks.slice(0, pointer).join(' ');
+     setDisplayedStory(nextText);
+
+     if (pointer >= chunks.length) {
+       if (storyIntervalRef.current) {
+         clearInterval(storyIntervalRef.current);
+         storyIntervalRef.current = null;
+       }
+     }
+   }, 260);
+
+   return () => {
+     if (storyIntervalRef.current) {
+       clearInterval(storyIntervalRef.current);
+       storyIntervalRef.current = null;
+     }
+   };
+ }, [storyData, currentTrackIndex]);
 
 
  useEffect(() => {
@@ -945,19 +986,23 @@ export default function App() {
 
        {/* Content */}
        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 30, position: 'relative', zIndex: 5, background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%)' }}>
-         <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', fontSize: 120, opacity: 0.1, filter: 'blur(2px)', zIndex: 1 }}>🎵</div>
-        
+        <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', fontSize: 120, opacity: 0.1, filter: 'blur(2px)', zIndex: 1 }}>🎵</div>
+
          <div style={{ background: '#1DB954', color: 'black', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px 8px', borderRadius: 4, alignSelf: 'flex-start', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1, zIndex: 2 }}>
            Trending #{currentTrackIndex + 1}
+         </div>
+         <div className="story-caption" style={{ marginBottom: 16, zIndex: 2 }}>
+           <span className="story-caption__signal" aria-hidden="true" />
+           <span className="story-caption__text">{displayedStory || storyData?.tracks[currentTrackIndex].story}</span>
+         </div>
+         <div style={{ fontSize: '0.8rem', letterSpacing: 0.5, textTransform: 'uppercase', opacity: 0.7, marginBottom: 6, zIndex: 2 }}>
+           Track details
          </div>
          <div style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.1, marginBottom: 8, textShadow: '0 2px 4px rgba(0,0,0,0.5)', zIndex: 2 }}>
            {storyData?.tracks[currentTrackIndex].song}
          </div>
-         <div style={{ fontSize: '1.1rem', opacity: 0.9, marginBottom: 20, fontWeight: 500, zIndex: 2 }}>
+         <div style={{ fontSize: '1.1rem', opacity: 0.9, marginBottom: 6, fontWeight: 500, zIndex: 2 }}>
            {storyData?.tracks[currentTrackIndex].artist}
-         </div>
-         <div style={{ fontSize: '1rem', lineHeight: 1.5, opacity: 0.9, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', padding: 15, borderRadius: 8, borderLeft: '3px solid #1DB954', zIndex: 2 }}>
-           {storyData?.tracks[currentTrackIndex].story}
          </div>
        </div>
 
