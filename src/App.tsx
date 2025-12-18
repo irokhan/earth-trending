@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import earthSound from './sound_of_earth.mp3';
 
 
 // --- Types ---
@@ -369,6 +370,8 @@ export default function App() {
  const [storyData, setStoryData] = useState<StoryData>(null);
  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
  const [panelVisible, setPanelVisible] = useState(false);
+ const audioRef = useRef<HTMLAudioElement | null>(null);
+ const fadeReqRef = useRef<number | null>(null);
 
 
  // --- Animation Refs ---
@@ -384,6 +387,73 @@ export default function App() {
  const targetCamPos = useRef<THREE.Vector3 | null>(null);
  const targetLookAt = useRef<THREE.Vector3 | null>(null);
  const targetSelectionVal = useRef<number>(0.0);
+
+ const BASE_AUDIO_VOLUME = 0.08;
+
+ const fadeAudioTo = (targetVolume: number, duration = 400) => {
+   const audio = audioRef.current;
+   if (!audio) return;
+
+   if (fadeReqRef.current) cancelAnimationFrame(fadeReqRef.current);
+
+   const start = audio.volume;
+   const startTime = performance.now();
+
+   const tick = (now: number) => {
+     const progress = Math.min((now - startTime) / duration, 1);
+     const nextVolume = start + (targetVolume - start) * progress;
+     audio.volume = Math.max(0, Math.min(nextVolume, 1));
+
+     if (progress < 1) {
+       fadeReqRef.current = requestAnimationFrame(tick);
+     } else {
+       fadeReqRef.current = null;
+       if (targetVolume === 0) {
+         audio.pause();
+         audio.currentTime = 0;
+       }
+     }
+   };
+
+   if (targetVolume > 0 && audio.paused) {
+     audio.play().catch(() => {});
+   }
+
+   fadeReqRef.current = requestAnimationFrame(tick);
+ };
+
+ useEffect(() => {
+  const audio = new Audio(earthSound);
+  audio.loop = true;
+  audio.volume = 0;
+  audioRef.current = audio;
+
+   fadeAudioTo(BASE_AUDIO_VOLUME, 700);
+
+   const unlockAudio = () => {
+     audio.play().catch(() => {});
+     window.removeEventListener('pointerdown', unlockAudio);
+     window.removeEventListener('touchstart', unlockAudio);
+   };
+
+   window.addEventListener('pointerdown', unlockAudio);
+   window.addEventListener('touchstart', unlockAudio);
+
+   return () => {
+     if (fadeReqRef.current) cancelAnimationFrame(fadeReqRef.current);
+     window.removeEventListener('pointerdown', unlockAudio);
+     window.removeEventListener('touchstart', unlockAudio);
+     audio.pause();
+   };
+ }, []);
+
+ useEffect(() => {
+   if (!panelVisible) {
+     fadeAudioTo(BASE_AUDIO_VOLUME, 700);
+   } else {
+     fadeAudioTo(0, 500);
+   }
+ }, [panelVisible]);
 
 
  useEffect(() => {
