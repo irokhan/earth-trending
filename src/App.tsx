@@ -6,18 +6,18 @@ import earthSound from './sound_of_earth.mp3';
 
 // --- Types ---
 type Track = {
- song: string;
- artist: string;
- story: string;
+  song: string;
+  artist: string;
+  story: string;
 };
 
 
 type Market = {
- name: string;
- lat: number;
- lon: number;
- flag: string;
- tracks: Track[];
+  name: string;
+  lat: number;
+  lon: number;
+  flag: string;
+  tracks: Track[];
 };
 
 
@@ -246,796 +246,793 @@ const DOT_FRAGMENT = `
 
 // --- Utils ---
 const createParticleTexture = (emoji: string): THREE.Texture => {
- const canvas = document.createElement('canvas');
- canvas.width = 64; canvas.height = 64;
- const ctx = canvas.getContext('2d');
- if(ctx) {
-   ctx.font = "40px Arial";
-   ctx.textAlign = "center";
-   ctx.textBaseline = "middle";
-   ctx.fillText(emoji, 32, 32);
- }
- const tex = new THREE.CanvasTexture(canvas);
- return tex;
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.font = "40px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(emoji, 32, 32);
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  return tex;
 };
 
 const latLonToVector = (lon: number, lat: number, radius: number) => {
- const phi = (90 - lat) * (Math.PI / 180);
- const theta = (lon + 180) * (Math.PI / 180);
- return new THREE.Vector3(
-   -(radius * Math.sin(phi) * Math.cos(theta)),
-   radius * Math.cos(phi),
-   radius * Math.sin(phi) * Math.sin(theta)
- );
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lon + 180) * (Math.PI / 180);
+  return new THREE.Vector3(
+    -(radius * Math.sin(phi) * Math.cos(theta)),
+    radius * Math.cos(phi),
+    radius * Math.sin(phi) * Math.sin(theta)
+  );
 };
 
 
 // --- Data ---
 const MARKET_LIST = [
- { name: "Andorra", lat: 42.5, lon: 1.5, flag: "🇦🇩" },
- { name: "United Arab Emirates", lat: 23.4, lon: 53.8, flag: "🇦🇪" },
- { name: "Argentina", lat: -38.4, lon: -63.6, flag: "🇦🇷" },
- { name: "Austria", lat: 47.5, lon: 14.5, flag: "🇦🇹" },
- { name: "Australia", lat: -25.2, lon: 133.7, flag: "🇦🇺" },
- { name: "Belgium", lat: 50.5, lon: 4.4, flag: "🇧🇪" },
- { name: "Bulgaria", lat: 42.7, lon: 25.4, flag: "🇧🇬" },
- { name: "Bolivia", lat: -16.2, lon: -63.5, flag: "🇧🇴" },
- { name: "Brazil", lat: -14.2, lon: -51.9, flag: "🇧🇷" },
- { name: "Belarus", lat: 53.7, lon: 27.9, flag: "🇧🇾" },
- { name: "Canada", lat: 56.1, lon: -106.3, flag: "🇨🇦" },
- { name: "Switzerland", lat: 46.8, lon: 8.2, flag: "🇨🇭" },
- { name: "Chile", lat: -35.6, lon: -71.5, flag: "🇨🇱" },
- { name: "Colombia", lat: 4.5, lon: -74.2, flag: "🇨🇴" },
- { name: "Costa Rica", lat: 9.7, lon: -83.7, flag: "🇨🇷" },
- { name: "Cyprus", lat: 35.1, lon: 33.4, flag: "🇨🇾" },
- { name: "Czechia", lat: 49.8, lon: 15.4, flag: "🇨🇿" },
- { name: "Germany", lat: 51.1, lon: 10.4, flag: "🇩🇪" },
- { name: "Denmark", lat: 56.2, lon: 9.5, flag: "🇩🇰" },
- { name: "Dominican Republic", lat: 18.7, lon: -70.1, flag: "🇩🇴" },
- { name: "Ecuador", lat: -1.8, lon: -78.1, flag: "🇪🇨" },
- { name: "Estonia", lat: 58.5, lon: 25.0, flag: "🇪🇪" },
- { name: "Egypt", lat: 26.8, lon: 30.8, flag: "🇪🇬" },
- { name: "Spain", lat: 40.4, lon: -3.7, flag: "🇪🇸" },
- { name: "Finland", lat: 61.9, lon: 25.7, flag: "🇫🇮" },
- { name: "France", lat: 46.2, lon: 2.2, flag: "🇫🇷" },
- { name: "United Kingdom", lat: 55.3, lon: -3.4, flag: "🇬🇧" },
- { name: "Greece", lat: 39.0, lon: 21.8, flag: "🇬🇷" },
- { name: "Guatemala", lat: 15.7, lon: -90.2, flag: "🇬🇹" },
- { name: "Hong Kong", lat: 22.3, lon: 114.1, flag: "🇭🇰" },
- { name: "Honduras", lat: 15.2, lon: -86.2, flag: "🇭🇳" },
- { name: "Hungary", lat: 47.1, lon: 19.5, flag: "🇭🇺" },
- { name: "Indonesia", lat: -0.7, lon: 113.9, flag: "🇮🇩" },
- { name: "Ireland", lat: 53.4, lon: -8.2, flag: "🇮🇪" },
- { name: "Israel", lat: 31.0, lon: 34.8, flag: "🇮🇱" },
- { name: "India", lat: 20.5, lon: 78.9, flag: "🇮🇳" },
- { name: "Iceland", lat: 64.9, lon: -19.0, flag: "🇮🇸" },
- { name: "Italy", lat: 41.8, lon: 12.5, flag: "🇮🇹" },
- { name: "Japan", lat: 36.2, lon: 138.2, flag: "🇯🇵" },
- { name: "South Korea", lat: 35.9, lon: 127.7, flag: "🇰🇷" },
- { name: "Kazakhstan", lat: 48.0, lon: 66.9, flag: "🇰🇿" },
- { name: "Lithuania", lat: 55.1, lon: 23.8, flag: "🇱🇹" },
- { name: "Luxembourg", lat: 49.8, lon: 6.1, flag: "🇱🇺" },
- { name: "Latvia", lat: 56.8, lon: 24.6, flag: "🇱🇻" },
- { name: "Morocco", lat: 31.7, lon: -7.0, flag: "🇲🇦" },
- { name: "Mexico", lat: 23.6, lon: -102.5, flag: "🇲🇽" },
- { name: "Malaysia", lat: 4.2, lon: 101.9, flag: "🇲🇾" },
- { name: "Nigeria", lat: 9.0, lon: 8.6, flag: "🇳🇬" },
- { name: "Nicaragua", lat: 12.8, lon: -85.2, flag: "🇳🇮" },
- { name: "Netherlands", lat: 52.1, lon: 5.2, flag: "🇳🇱" },
- { name: "Norway", lat: 60.4, lon: 8.4, flag: "🇳🇴" },
- { name: "New Zealand", lat: -40.9, lon: 174.8, flag: "🇳🇿" },
- { name: "Panama", lat: 8.5, lon: -80.7, flag: "🇵🇦" },
- { name: "Peru", lat: -9.1, lon: -75.0, flag: "🇵🇪" },
- { name: "Philippines", lat: 12.8, lon: 121.7, flag: "🇵🇭" },
- { name: "Pakistan", lat: 30.3, lon: 69.3, flag: "🇵🇰" },
- { name: "Poland", lat: 51.9, lon: 19.1, flag: "🇵🇱" },
- { name: "Portugal", lat: 39.3, lon: -8.2, flag: "🇵🇹" },
- { name: "Paraguay", lat: -23.4, lon: -58.4, flag: "🇵🇾" },
- { name: "Romania", lat: 45.9, lon: 24.9, flag: "🇷🇴" },
- { name: "Saudi Arabia", lat: 23.8, lon: 45.0, flag: "🇸🇦" },
- { name: "Sweden", lat: 60.1, lon: 18.6, flag: "🇸🇪" },
- { name: "Singapore", lat: 1.3, lon: 103.8, flag: "🇸🇬" },
- { name: "Slovakia", lat: 48.6, lon: 19.6, flag: "🇸🇰" },
- { name: "El Salvador", lat: 13.7, lon: -88.8, flag: "🇸🇻" },
- { name: "Thailand", lat: 15.8, lon: 100.9, flag: "🇹🇭" },
- { name: "Turkey", lat: 38.9, lon: 35.2, flag: "🇹🇷" },
- { name: "Taiwan", lat: 23.6, lon: 120.9, flag: "🇹🇼" },
- { name: "Ukraine", lat: 48.3, lon: 31.1, flag: "🇺🇦" },
- { name: "United States", lat: 37.0, lon: -95.7, flag: "🇺🇸" },
- { name: "Uruguay", lat: -32.5, lon: -55.7, flag: "🇺🇾" },
- { name: "Venezuela", lat: 6.4, lon: -66.5, flag: "🇻🇪" },
- { name: "Vietnam", lat: 14.0, lon: 108.2, flag: "🇻🇳" },
- { name: "South Africa", lat: -30.5, lon: 22.9, flag: "🇿🇦" }
+  { name: "Andorra", lat: 42.5, lon: 1.5, flag: "🇦🇩" },
+  { name: "United Arab Emirates", lat: 23.4, lon: 53.8, flag: "🇦🇪" },
+  { name: "Argentina", lat: -38.4, lon: -63.6, flag: "🇦🇷" },
+  { name: "Austria", lat: 47.5, lon: 14.5, flag: "🇦🇹" },
+  { name: "Australia", lat: -25.2, lon: 133.7, flag: "🇦🇺" },
+  { name: "Belgium", lat: 50.5, lon: 4.4, flag: "🇧🇪" },
+  { name: "Bulgaria", lat: 42.7, lon: 25.4, flag: "🇧🇬" },
+  { name: "Bolivia", lat: -16.2, lon: -63.5, flag: "🇧🇴" },
+  { name: "Brazil", lat: -14.2, lon: -51.9, flag: "🇧🇷" },
+  { name: "Belarus", lat: 53.7, lon: 27.9, flag: "🇧🇾" },
+  { name: "Canada", lat: 56.1, lon: -106.3, flag: "🇨🇦" },
+  { name: "Switzerland", lat: 46.8, lon: 8.2, flag: "🇨🇭" },
+  { name: "Chile", lat: -35.6, lon: -71.5, flag: "🇨🇱" },
+  { name: "Colombia", lat: 4.5, lon: -74.2, flag: "🇨🇴" },
+  { name: "Costa Rica", lat: 9.7, lon: -83.7, flag: "🇨🇷" },
+  { name: "Cyprus", lat: 35.1, lon: 33.4, flag: "🇨🇾" },
+  { name: "Czechia", lat: 49.8, lon: 15.4, flag: "🇨🇿" },
+  { name: "Germany", lat: 51.1, lon: 10.4, flag: "🇩🇪" },
+  { name: "Denmark", lat: 56.2, lon: 9.5, flag: "🇩🇰" },
+  { name: "Dominican Republic", lat: 18.7, lon: -70.1, flag: "🇩🇴" },
+  { name: "Ecuador", lat: -1.8, lon: -78.1, flag: "🇪🇨" },
+  { name: "Estonia", lat: 58.5, lon: 25.0, flag: "🇪🇪" },
+  { name: "Egypt", lat: 26.8, lon: 30.8, flag: "🇪🇬" },
+  { name: "Spain", lat: 40.4, lon: -3.7, flag: "🇪🇸" },
+  { name: "Finland", lat: 61.9, lon: 25.7, flag: "🇫🇮" },
+  { name: "France", lat: 46.2, lon: 2.2, flag: "🇫🇷" },
+  { name: "United Kingdom", lat: 55.3, lon: -3.4, flag: "🇬🇧" },
+  { name: "Greece", lat: 39.0, lon: 21.8, flag: "🇬🇷" },
+  { name: "Guatemala", lat: 15.7, lon: -90.2, flag: "🇬🇹" },
+  { name: "Hong Kong", lat: 22.3, lon: 114.1, flag: "🇭🇰" },
+  { name: "Honduras", lat: 15.2, lon: -86.2, flag: "🇭🇳" },
+  { name: "Hungary", lat: 47.1, lon: 19.5, flag: "🇭🇺" },
+  { name: "Indonesia", lat: -0.7, lon: 113.9, flag: "🇮🇩" },
+  { name: "Ireland", lat: 53.4, lon: -8.2, flag: "🇮🇪" },
+  { name: "Israel", lat: 31.0, lon: 34.8, flag: "🇮🇱" },
+  { name: "India", lat: 20.5, lon: 78.9, flag: "🇮🇳" },
+  { name: "Iceland", lat: 64.9, lon: -19.0, flag: "🇮🇸" },
+  { name: "Italy", lat: 41.8, lon: 12.5, flag: "🇮🇹" },
+  { name: "Japan", lat: 36.2, lon: 138.2, flag: "🇯🇵" },
+  { name: "South Korea", lat: 35.9, lon: 127.7, flag: "🇰🇷" },
+  { name: "Kazakhstan", lat: 48.0, lon: 66.9, flag: "🇰🇿" },
+  { name: "Lithuania", lat: 55.1, lon: 23.8, flag: "🇱🇹" },
+  { name: "Luxembourg", lat: 49.8, lon: 6.1, flag: "🇱🇺" },
+  { name: "Latvia", lat: 56.8, lon: 24.6, flag: "🇱🇻" },
+  { name: "Morocco", lat: 31.7, lon: -7.0, flag: "🇲🇦" },
+  { name: "Mexico", lat: 23.6, lon: -102.5, flag: "🇲🇽" },
+  { name: "Malaysia", lat: 4.2, lon: 101.9, flag: "🇲🇾" },
+  { name: "Nigeria", lat: 9.0, lon: 8.6, flag: "🇳🇬" },
+  { name: "Nicaragua", lat: 12.8, lon: -85.2, flag: "🇳🇮" },
+  { name: "Netherlands", lat: 52.1, lon: 5.2, flag: "🇳🇱" },
+  { name: "Norway", lat: 60.4, lon: 8.4, flag: "🇳🇴" },
+  { name: "New Zealand", lat: -40.9, lon: 174.8, flag: "🇳🇿" },
+  { name: "Panama", lat: 8.5, lon: -80.7, flag: "🇵🇦" },
+  { name: "Peru", lat: -9.1, lon: -75.0, flag: "🇵🇪" },
+  { name: "Philippines", lat: 12.8, lon: 121.7, flag: "🇵🇭" },
+  { name: "Pakistan", lat: 30.3, lon: 69.3, flag: "🇵🇰" },
+  { name: "Poland", lat: 51.9, lon: 19.1, flag: "🇵🇱" },
+  { name: "Portugal", lat: 39.3, lon: -8.2, flag: "🇵🇹" },
+  { name: "Paraguay", lat: -23.4, lon: -58.4, flag: "🇵🇾" },
+  { name: "Romania", lat: 45.9, lon: 24.9, flag: "🇷🇴" },
+  { name: "Saudi Arabia", lat: 23.8, lon: 45.0, flag: "🇸🇦" },
+  { name: "Sweden", lat: 60.1, lon: 18.6, flag: "🇸🇪" },
+  { name: "Singapore", lat: 1.3, lon: 103.8, flag: "🇸🇬" },
+  { name: "Slovakia", lat: 48.6, lon: 19.6, flag: "🇸🇰" },
+  { name: "El Salvador", lat: 13.7, lon: -88.8, flag: "🇸🇻" },
+  { name: "Thailand", lat: 15.8, lon: 100.9, flag: "🇹🇭" },
+  { name: "Turkey", lat: 38.9, lon: 35.2, flag: "🇹🇷" },
+  { name: "Taiwan", lat: 23.6, lon: 120.9, flag: "🇹🇼" },
+  { name: "Ukraine", lat: 48.3, lon: 31.1, flag: "🇺🇦" },
+  { name: "United States", lat: 37.0, lon: -95.7, flag: "🇺🇸" },
+  { name: "Uruguay", lat: -32.5, lon: -55.7, flag: "🇺🇾" },
+  { name: "Venezuela", lat: 6.4, lon: -66.5, flag: "🇻🇪" },
+  { name: "Vietnam", lat: 14.0, lon: 108.2, flag: "🇻🇳" },
+  { name: "South Africa", lat: -30.5, lon: 22.9, flag: "🇿🇦" }
 ];
 
 
 // Preserved custom stories
-const CUSTOM_STORIES: {[key: string]: Track[]} = {
- "United States": [{song: "Digital Rodeo", artist: "Synth Cowboy", story: "Viral on TikTok after a cat was filmed dancing perfectly on beat."}, {song: "Neon Highway", artist: "Lazerhawk", story: "The opening track for the new blockbuster sci-fi series."}, {song: "Code Blue", artist: "Medical Beats", story: "Samples a literal heart monitor, trending among med students."}],
- "Brazil": [{song: "Carnaval Futuro", artist: "Rio Beats", story: "Blasting from every beach speaker in Copacabana this summer."}, {song: "Amazonia Pulse", artist: "Green Rhythm", story: "Features actual rainforest sounds, raising money for charity."}, {song: "Samba Glitch", artist: "Favela Tech", story: "A fusion of classic samba and distorted 808s."}],
- "United Kingdom": [{song: "Tea & Bass", artist: "London Fog", story: "Oddly soothing grime track that samples a boiling kettle."}, {song: "Royal Dub", artist: "Crown Jewels", story: "Rumor has it a member of the royal family produced this anonymously."}, {song: "Tube Station", artist: "Mind The Gap", story: "Recorded entirely in the London Underground."}],
- "Mexico": [{song: "Cactus Flower", artist: "Luna Sol", story: "Causing spontaneous dance-offs in Mexico City subway stations."}, {song: "Spicy Signal", artist: "Chili Wave", story: "The beat drops exactly when the hot sauce hits."}, {song: "Aztec Gold", artist: "Ancient Future", story: "Mixing pre-Hispanic flutes with heavy trap beats."}],
- "India": [{song: "Mumbai Drift", artist: "Raja Velocity", story: "The #1 song for rickshaw racing. Traffic police issued an advisory."}, {song: "Spice Market", artist: "Curry Tech", story: "Uses the sound of frying spices as a hi-hat."}, {song: "Bollywood Bot", artist: "AI Singer", story: "First hit song entirely generated by a local AI."}],
- "Germany": [{song: "Autobahn Infinity", artist: "Kraftwerk 2.0", story: "Perfectly syncs with the blinking of traffic lights in Berlin."}, {song: "Industrial Heart", artist: "Steel Factory", story: "Recorded in an abandoned car manufacturing plant."}, {song: "Beer Hall Bass", artist: "Oktoberfest", story: "Imagine a tuba, but distorted through a guitar amp."}],
- "France": [{song: "Croissant Moon", artist: "Paris Nuit", story: "A famous chef baked bread to the rhythm of this bassline."}, {song: "Seine Flow", artist: "River Boy", story: "Lo-fi beats to relax/study/paint portraits to."}, {song: "Fashion Week", artist: "Haute Couture", story: "The runway anthem for this year's most avant-garde show."}],
- "Argentina": [{song: "Glacier Tango", artist: "Patagonia Sounds", story: "Melancholic tango surprisingly popular at football stadiums."}, {song: "Asado Anthem", artist: "Grill Master", story: "The official soundtrack of Sunday BBQs."}, {song: "Pampas Wind", artist: "Gaucho Lo-Fi", story: "Acoustic guitar mixed with wind samples from the plains."}],
- "Spain": [{song: "Siesta Surprise", artist: "Madrid Chill", story: "Ironically upbeat, usually played at 3 PM to wake everyone up."}, {song: "Flamenco 3000", artist: "Seville Cyber", story: "Robot clapping samples replaced castanets."}, {song: "Ibiza Dawn", artist: "Island Life", story: "The track that never ends, literally 4 hours long."}],
- "Canada": [{song: "Maple Syrup Flow", artist: "Northern Lights", story: "A lo-fi hip hop track recorded entirely in an ice fishing hut."}, {song: "Moose Call", artist: "Wilderness", story: "Uses a sampled moose call as the bass drop."}, {song: "Hockey Night", artist: "Puck Drop", story: "Played every time a goal is scored in Toronto."}]
+const CUSTOM_STORIES: { [key: string]: Track[] } = {
+  "United States": [{ song: "Digital Rodeo", artist: "Synth Cowboy", story: "Viral on TikTok after a cat was filmed dancing perfectly on beat." }, { song: "Neon Highway", artist: "Lazerhawk", story: "The opening track for the new blockbuster sci-fi series." }, { song: "Code Blue", artist: "Medical Beats", story: "Samples a literal heart monitor, trending among med students." }],
+  "Brazil": [{ song: "Carnaval Futuro", artist: "Rio Beats", story: "Blasting from every beach speaker in Copacabana this summer." }, { song: "Amazonia Pulse", artist: "Green Rhythm", story: "Features actual rainforest sounds, raising money for charity." }, { song: "Samba Glitch", artist: "Favela Tech", story: "A fusion of classic samba and distorted 808s." }],
+  "United Kingdom": [{ song: "Tea & Bass", artist: "London Fog", story: "Oddly soothing grime track that samples a boiling kettle." }, { song: "Royal Dub", artist: "Crown Jewels", story: "Rumor has it a member of the royal family produced this anonymously." }, { song: "Tube Station", artist: "Mind The Gap", story: "Recorded entirely in the London Underground." }],
+  "Mexico": [{ song: "Cactus Flower", artist: "Luna Sol", story: "Causing spontaneous dance-offs in Mexico City subway stations." }, { song: "Spicy Signal", artist: "Chili Wave", story: "The beat drops exactly when the hot sauce hits." }, { song: "Aztec Gold", artist: "Ancient Future", story: "Mixing pre-Hispanic flutes with heavy trap beats." }],
+  "India": [{ song: "Mumbai Drift", artist: "Raja Velocity", story: "The #1 song for rickshaw racing. Traffic police issued an advisory." }, { song: "Spice Market", artist: "Curry Tech", story: "Uses the sound of frying spices as a hi-hat." }, { song: "Bollywood Bot", artist: "AI Singer", story: "First hit song entirely generated by a local AI." }],
+  "Germany": [{ song: "Autobahn Infinity", artist: "Kraftwerk 2.0", story: "Perfectly syncs with the blinking of traffic lights in Berlin." }, { song: "Industrial Heart", artist: "Steel Factory", story: "Recorded in an abandoned car manufacturing plant." }, { song: "Beer Hall Bass", artist: "Oktoberfest", story: "Imagine a tuba, but distorted through a guitar amp." }],
+  "France": [{ song: "Croissant Moon", artist: "Paris Nuit", story: "*Wenoir’s track *“L’addition”** from the 10 November 2025 single of the same name has been popping up on Spotify discovery and playlist tools because it’s a short, high-energy Afro/dance track (around 3:08 at about 103 BPM) that fits perfectly into upbeat mixes people are building right now.*Wenoir’s track *“L’addition”** from the 10 November 2025 single of the same name has been popping up on Spotify discovery and playlist tools because it’s a short, high-energy Afro/dance track (around 3:08 at about 103 BPM) that fits perfectly into upbeat mixes people are building right now" }, { song: "Seine Flow", artist: "River Boy", story: "Lo-fi beats to relax/study/paint portraits to." }, { song: "Fashion Week", artist: "Haute Couture", story: "The runway anthem for this year's most avant-garde show." }],
+  "Argentina": [{ song: "Glacier Tango", artist: "Patagonia Sounds", story: "Melancholic tango surprisingly popular at football stadiums." }, { song: "Asado Anthem", artist: "Grill Master", story: "The official soundtrack of Sunday BBQs." }, { song: "Pampas Wind", artist: "Gaucho Lo-Fi", story: "Acoustic guitar mixed with wind samples from the plains." }],
+  "Spain": [{ song: "Siesta Surprise", artist: "Madrid Chill", story: "Ironically upbeat, usually played at 3 PM to wake everyone up." }, { song: "Flamenco 3000", artist: "Seville Cyber", story: "Robot clapping samples replaced castanets." }, { song: "Ibiza Dawn", artist: "Island Life", story: "The track that never ends, literally 4 hours long." }],
+  "Canada": [{ song: "Maple Syrup Flow", artist: "Northern Lights", story: "A lo-fi hip hop track recorded entirely in an ice fishing hut." }, { song: "Moose Call", artist: "Wilderness", story: "Uses a sampled moose call as the bass drop." }, { song: "Hockey Night", artist: "Puck Drop", story: "Played every time a goal is scored in Toronto." }]
 };
 
 
 // Generate full list with tracks
 const TOP_MARKETS: Market[] = MARKET_LIST.map(m => ({
- ...m,
- tracks: CUSTOM_STORIES[m.name] || [
-   { song: `Viral Hit in ${m.name}`, artist: "Local Star", story: `Trending #1 across ${m.name} today.` },
-   { song: "Summer Vibes", artist: "DJ Solar", story: "Playing in every club downtown." },
-   { song: "Night Drive", artist: "Neon City", story: "The soundtrack for late night drives." }
- ]
+  ...m,
+  tracks: CUSTOM_STORIES[m.name] || [
+    { song: `Viral Hit in ${m.name}`, artist: "Local Star", story: `Trending #1 across ${m.name} today.` },
+    { song: "Summer Vibes", artist: "DJ Solar", story: "Playing in every club downtown." },
+    { song: "Night Drive", artist: "Neon City", story: "The soundtrack for late night drives." }
+  ]
 }));
 
 
 export default function App() {
- const canvasRef = useRef<HTMLCanvasElement>(null);
- const [storyData, setStoryData] = useState<StoryData>(null);
- const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
- const [panelVisible, setPanelVisible] = useState(false);
- const [introVisible, setIntroVisible] = useState(true);
- const [audioUnlocked, setAudioUnlocked] = useState(false);
- const [pickerOpen, setPickerOpen] = useState(false);
- const [displayedStory, setDisplayedStory] = useState('');
- const audioRef = useRef<HTMLAudioElement | null>(null);
- const fadeReqRef = useRef<number | null>(null);
- const pickerOpenRef = useRef(false);
- const storyIntervalRef = useRef<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [storyData, setStoryData] = useState<StoryData>(null);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [panelVisible, setPanelVisible] = useState(false);
+  const [introVisible, setIntroVisible] = useState(true);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [displayedStory, setDisplayedStory] = useState('');
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fadeReqRef = useRef<number | null>(null);
+  const pickerOpenRef = useRef(false);
+  const storyIntervalRef = useRef<number | null>(null);
 
 
- // --- Animation Refs ---
- const sceneRef = useRef<THREE.Scene | null>(null);
- const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
- const controlsRef = useRef<OrbitControls | null>(null);
- const materialsRef = useRef<THREE.ShaderMaterial[]>([]);
- const landMeshRef = useRef<THREE.Mesh | null>(null);
- const baseMeshRef = useRef<THREE.Mesh | null>(null);
- const particlesRef = useRef<any[]>([]);
- const spritesRef = useRef<THREE.Sprite[]>([]);
+  // --- Animation Refs ---
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
+  const materialsRef = useRef<THREE.ShaderMaterial[]>([]);
+  const landMeshRef = useRef<THREE.Mesh | null>(null);
+  const baseMeshRef = useRef<THREE.Mesh | null>(null);
+  const particlesRef = useRef<any[]>([]);
+  const spritesRef = useRef<THREE.Sprite[]>([]);
   // Animation Targets
- const targetCamPos = useRef<THREE.Vector3 | null>(null);
- const targetLookAt = useRef<THREE.Vector3 | null>(null);
- const targetSelectionVal = useRef<number>(0.0);
-
- const BASE_AUDIO_VOLUME = 0.08;
-
- const fadeAudioTo = (targetVolume: number, duration = 400) => {
-   const audio = audioRef.current;
-   if (!audio) return;
-
-   if (fadeReqRef.current) cancelAnimationFrame(fadeReqRef.current);
-
-   const start = audio.volume;
-   const startTime = performance.now();
-
-   const tick = (now: number) => {
-     const progress = Math.min((now - startTime) / duration, 1);
-     const nextVolume = start + (targetVolume - start) * progress;
-     audio.volume = Math.max(0, Math.min(nextVolume, 1));
-
-     if (progress < 1) {
-       fadeReqRef.current = requestAnimationFrame(tick);
-     } else {
-       fadeReqRef.current = null;
-       if (targetVolume === 0) {
-         audio.pause();
-         audio.currentTime = 0;
-       }
-     }
-   };
-
-   if (targetVolume > 0 && audio.paused) {
-     audio.play().catch(() => {});
-   }
-
-   fadeReqRef.current = requestAnimationFrame(tick);
- };
-
- useEffect(() => {
-  const audio = new Audio(earthSound);
-  audio.loop = true;
-  audio.volume = 0;
-  audio.muted = true; // allow autoplay in browsers that block sound until interaction
-  audioRef.current = audio;
-
-   return () => {
-     if (fadeReqRef.current) cancelAnimationFrame(fadeReqRef.current);
-     audio.pause();
-   };
- }, []);
-
- useEffect(() => {
-   pickerOpenRef.current = pickerOpen;
- }, [pickerOpen]);
-
- useEffect(() => {
-   if (!audioUnlocked) return;
-   if (!panelVisible) {
-     fadeAudioTo(BASE_AUDIO_VOLUME, 700);
-   } else {
-     fadeAudioTo(0, 500);
-   }
- }, [panelVisible, audioUnlocked]);
-
- useEffect(() => {
-   if (storyIntervalRef.current) {
-     clearInterval(storyIntervalRef.current);
-     storyIntervalRef.current = null;
-   }
-
-   const story = storyData?.tracks[currentTrackIndex]?.story;
-   if (!story) {
-     setDisplayedStory('');
-     return;
-   }
-
-   const chunks = story.split(' ');
-   const chunkSize = Math.max(3, Math.floor(chunks.length / 6));
-   let pointer = chunkSize;
-
-   setDisplayedStory(chunks.slice(0, chunkSize).join(' '));
-
-   storyIntervalRef.current = window.setInterval(() => {
-     pointer += chunkSize;
-     const nextText = chunks.slice(0, pointer).join(' ');
-     setDisplayedStory(nextText);
-
-     if (pointer >= chunks.length) {
-       if (storyIntervalRef.current) {
-         clearInterval(storyIntervalRef.current);
-         storyIntervalRef.current = null;
-       }
-     }
-   }, 260);
-
-   return () => {
-     if (storyIntervalRef.current) {
-       clearInterval(storyIntervalRef.current);
-       storyIntervalRef.current = null;
-     }
-   };
- }, [storyData, currentTrackIndex]);
-
-
- useEffect(() => {
-   if (!canvasRef.current) return;
-
-
-   // --- Init Scene ---
-   const scene = new THREE.Scene();
-   sceneRef.current = scene;
-
-
-   const width = window.innerWidth;
-   const height = window.innerHeight;
-
-
-   const camera = new THREE.PerspectiveCamera(30, width / height, 1, 1000);
-   camera.position.z = 100;
-   cameraRef.current = camera;
-
-
-   const renderer = new THREE.WebGLRenderer({
-     canvas: canvasRef.current,
-     antialias: true,
-     alpha: true
-   });
-   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-   renderer.setSize(width, height);
-
-
-   const controls = new OrbitControls(camera, renderer.domElement);
-   controls.autoRotate = true;
-   controls.autoRotateSpeed = 1.2;
-   controls.enableDamping = true;
-   controls.enableRotate = true;
-   controls.enablePan = false;
-   controls.enableZoom = true;
-   controls.minDistance = 50;
-   controls.maxDistance = 200;
-   controls.minPolarAngle = (Math.PI / 2) - 0.5;
-   controls.maxPolarAngle = (Math.PI / 2) + 0.5;
-   controlsRef.current = controls;
-
-
-   // --- Lighting ---
-   const pointLight = new THREE.PointLight(0x081b26, 17, 200);
-   pointLight.position.set(-50, 0, 60);
-   scene.add(pointLight);
-   scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 1.5));
-
-
-   // --- Stars ---
-   const starGeo = new THREE.BufferGeometry();
-   const starCount = 2000;
-   const starPos = new Float32Array(starCount * 3);
-   for(let i=0; i<starCount*3; i++) starPos[i] = (Math.random()-0.5)*2000;
-   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-   const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.7, transparent: true, opacity: 0.8}));
-   scene.add(stars);
-
-
-   // --- 1. Ocean ---
-   const baseGeo = new THREE.SphereGeometry(19.5, 64, 64);
-   const baseMat = new THREE.ShaderMaterial({
-     uniforms: {
-       u_focusPoint: { value: new THREE.Vector3(0,0,0) },
-       u_hasSelection: { value: 0.0 }
-     },
-     vertexShader: OCEAN_VERTEX,
-     fragmentShader: OCEAN_FRAGMENT,
-     side: THREE.FrontSide
-   });
-   const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-   scene.add(baseMesh);
-   baseMeshRef.current = baseMesh;
-
-
-   // --- 3. Atmosphere ---
-   const atmosGeo = new THREE.SphereGeometry(21.5, 64, 64);
-   const atmosMat = new THREE.ShaderMaterial({
-     vertexShader: ATMOSPHERE_VERTEX,
-     fragmentShader: ATMOSPHERE_FRAGMENT,
-     blending: THREE.AdditiveBlending,
-     side: THREE.BackSide,
-     transparent: true
-   });
-   scene.add(new THREE.Mesh(atmosGeo, atmosMat));
-
-
-   // --- Map Data Loading ---
-   const textureLoader = new THREE.TextureLoader();
-   const imgLoader = new Image();
-   imgLoader.crossOrigin = "Anonymous";
-   // Load Water/Land mask for Dots (Black=Land, White=Water in this specific map)
-   imgLoader.src = 'https://unpkg.com/three-globe/example/img/earth-water.png';
-  
-   imgLoader.onload = () => {
-       // --- Generate Dots ---
-       const tempCanvas = document.createElement('canvas');
-       tempCanvas.width = 360;
-       tempCanvas.height = 180;
-       const ctx = tempCanvas.getContext('2d');
-       if(ctx) {
-           ctx.imageSmoothingEnabled = false;
-           ctx.drawImage(imgLoader, 0, 0, 360, 180);
-           const imgData = ctx.getImageData(0, 0, 360, 180).data;
-           const activeLatLon: {[key:number]: number[]} = {};
-
-
-           // Parse image data
-           for(let i=0, lon=-180, lat=90; i<imgData.length; i+=4, lon++) {
-               if(!activeLatLon[lat]) activeLatLon[lat] = [];
-               // Check Red channel. < 100 means dark (Land)
-               if(imgData[i] < 100) activeLatLon[lat].push(lon);
-               if(lon === 180) { lon = -180; lat--; }
-           }
-
-
-           // Create Dot Meshes
-           const dotSphereRadius = 20.2;
-           const dotDensity = 2.5;
-
-
-           for (let lat = 90, i = 0; lat > -90; lat--, i++) {
-               const r = Math.cos(Math.abs(lat) * (Math.PI / 180)) * dotSphereRadius;
-               const circumference = r * Math.PI * 2;
-               const dotsForLat = circumference * dotDensity;
-              
-               if(!activeLatLon[lat]) continue;
-
-
-               for (let x = 0; x < dotsForLat; x++) {
-                   const long = -180 + x * 360 / dotsForLat;
-                   const closest = activeLatLon[lat].reduce((prev, curr) =>
-                   (Math.abs(curr - long) < Math.abs(prev - long) ? curr : prev), -1000);
-                  
-                   if(Math.abs(long - closest) > 0.6) continue;
-
-
-                   const vector = latLonToVector(long, lat, dotSphereRadius);
-                   const dotGeo = new THREE.CircleGeometry(0.12, 5);
-                   dotGeo.lookAt(vector);
-                   dotGeo.translate(vector.x, vector.y, vector.z);
-                  
-                   const m = new THREE.ShaderMaterial({
-                       side: THREE.DoubleSide,
-                       uniforms: {
-                           u_time: { value: i * Math.sin(Math.random()) },
-                           u_maxExtrusion: { value: 1.0 },
-                           u_focusPoint: { value: new THREE.Vector3(0,0,0) },
-                           u_hasSelection: { value: 0.0 }
-                       },
-                       vertexShader: DOT_VERTEX,
-                       fragmentShader: DOT_FRAGMENT,
-                   });
-                   materialsRef.current.push(m);
-                   const mesh = new THREE.Mesh(dotGeo, m);
-                   scene.add(mesh);
-               }
-           }
-
-
-           // --- Generate Flags ---
-           TOP_MARKETS.forEach(m => {
-               const tex = createParticleTexture(m.flag);
-               const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-               const pos = latLonToVector(m.lon, m.lat, 22.5);
-               const sprite = new THREE.Sprite(mat);
-               sprite.position.copy(pos);
-               sprite.scale.set(3,3,3);
-               sprite.userData = { isFlag: true, country: m, position: pos, targetScale: 3 };
-               spritesRef.current.push(sprite);
-               scene.add(sprite);
-           });
-       }
-
-
-       // --- Load Land Mesh (Topology) ---
-       textureLoader.load('https://unpkg.com/three-globe/example/img/earth-topology.png', (mapTex) => {
-           const landGeo = new THREE.SphereGeometry(19.5, 128, 128);
-           const landMat = new THREE.ShaderMaterial({
-               uniforms: {
-                   map: { value: mapTex },
-                   u_time: { value: 0.0 },
-                   u_focusPoint: { value: new THREE.Vector3(0,0,0) },
-                   u_hasSelection: { value: 0.0 }
-               },
-               vertexShader: LAND_VERTEX,
-               fragmentShader: LAND_FRAGMENT,
-               transparent: true,
-               side: THREE.DoubleSide,
-               depthWrite: false
-           });
-           const landMesh = new THREE.Mesh(landGeo, landMat);
-           scene.add(landMesh);
-           landMeshRef.current = landMesh;
-       });
-   };
-
-
-   // --- Events ---
-   const raycaster = new THREE.Raycaster();
-   const mouse = new THREE.Vector2();
-   const particleTextures = ['💚', '🎵', '🔥', '✨'].map(createParticleTexture);
-
-
-   const onMouseDown = (e: MouseEvent) => {
-     // FIX: Allow interaction unless clicking specific UI elements
-     const card = document.getElementById('storyCard');
-     if(card?.classList.contains('active') && card.contains(e.target as Node)) return;
-     if (pickerOpenRef.current) return;
-
-
-     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-     raycaster.setFromCamera(mouse, camera);
-
-
-     const hits = raycaster.intersectObjects(spritesRef.current);
-     if(hits.length > 0) {
-       const sprite = hits[0].object;
-       const data = sprite.userData.country;
-       const pos = sprite.userData.position;
-
-
-       // Gimmick
-       for(let i=0; i<15; i++) {
-          const tex = particleTextures[Math.floor(Math.random()*4)];
-          const pMat = new THREE.SpriteMaterial({map: tex, transparent:true});
+  const targetCamPos = useRef<THREE.Vector3 | null>(null);
+  const targetLookAt = useRef<THREE.Vector3 | null>(null);
+  const targetSelectionVal = useRef<number>(0.0);
+
+  const BASE_AUDIO_VOLUME = 0.08;
+
+  const fadeAudioTo = (targetVolume: number, duration = 400) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (fadeReqRef.current) cancelAnimationFrame(fadeReqRef.current);
+
+    const start = audio.volume;
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const nextVolume = start + (targetVolume - start) * progress;
+      audio.volume = Math.max(0, Math.min(nextVolume, 1));
+
+      if (progress < 1) {
+        fadeReqRef.current = requestAnimationFrame(tick);
+      } else {
+        fadeReqRef.current = null;
+        if (targetVolume === 0) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      }
+    };
+
+    if (targetVolume > 0 && audio.paused) {
+      audio.play().catch(() => { });
+    }
+
+    fadeReqRef.current = requestAnimationFrame(tick);
+  };
+
+  useEffect(() => {
+    const audio = new Audio(earthSound);
+    audio.loop = true;
+    audio.volume = 0;
+    audio.muted = true; // allow autoplay in browsers that block sound until interaction
+    audioRef.current = audio;
+
+    return () => {
+      if (fadeReqRef.current) cancelAnimationFrame(fadeReqRef.current);
+      audio.pause();
+    };
+  }, []);
+
+  useEffect(() => {
+    pickerOpenRef.current = pickerOpen;
+  }, [pickerOpen]);
+
+  useEffect(() => {
+    if (!audioUnlocked) return;
+    if (!panelVisible) {
+      fadeAudioTo(BASE_AUDIO_VOLUME, 700);
+    } else {
+      fadeAudioTo(0, 500);
+    }
+  }, [panelVisible, audioUnlocked]);
+
+  useEffect(() => {
+    if (storyIntervalRef.current) {
+      clearInterval(storyIntervalRef.current);
+      storyIntervalRef.current = null;
+    }
+
+    const story = storyData?.tracks[currentTrackIndex]?.story;
+    if (!story) {
+      setDisplayedStory('');
+      return;
+    }
+
+    const chunks = story.split(' ');
+    const chunkSize = Math.max(3, Math.floor(chunks.length / 6));
+    let pointer = chunkSize;
+
+    setDisplayedStory(chunks.slice(0, chunkSize).join(' '));
+
+    storyIntervalRef.current = window.setInterval(() => {
+      pointer += chunkSize;
+      const nextText = chunks.slice(0, pointer).join(' ');
+      setDisplayedStory(nextText);
+
+      if (pointer >= chunks.length) {
+        if (storyIntervalRef.current) {
+          clearInterval(storyIntervalRef.current);
+          storyIntervalRef.current = null;
+        }
+      }
+    }, 260);
+
+    return () => {
+      if (storyIntervalRef.current) {
+        clearInterval(storyIntervalRef.current);
+        storyIntervalRef.current = null;
+      }
+    };
+  }, [storyData, currentTrackIndex]);
+
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+
+    // --- Init Scene ---
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
+
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+
+    const camera = new THREE.PerspectiveCamera(30, width / height, 1, 1000);
+    camera.position.z = 100;
+    cameraRef.current = camera;
+
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvasRef.current,
+      antialias: true,
+      alpha: true
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(width, height);
+
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1.2;
+    controls.enableDamping = true;
+    controls.enableRotate = true;
+    controls.enablePan = false;
+    controls.enableZoom = true;
+    controls.minDistance = 50;
+    controls.maxDistance = 200;
+    controls.minPolarAngle = (Math.PI / 2) - 0.5;
+    controls.maxPolarAngle = (Math.PI / 2) + 0.5;
+    controlsRef.current = controls;
+
+
+    // --- Lighting ---
+    const pointLight = new THREE.PointLight(0x081b26, 17, 200);
+    pointLight.position.set(-50, 0, 60);
+    scene.add(pointLight);
+    scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 1.5));
+
+
+    // --- Stars ---
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 2000;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i++) starPos[i] = (Math.random() - 0.5) * 2000;
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.7, transparent: true, opacity: 0.8 }));
+    scene.add(stars);
+
+
+    // --- 1. Ocean ---
+    const baseGeo = new THREE.SphereGeometry(19.5, 64, 64);
+    const baseMat = new THREE.ShaderMaterial({
+      uniforms: {
+        u_focusPoint: { value: new THREE.Vector3(0, 0, 0) },
+        u_hasSelection: { value: 0.0 }
+      },
+      vertexShader: OCEAN_VERTEX,
+      fragmentShader: OCEAN_FRAGMENT,
+      side: THREE.FrontSide
+    });
+    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+    scene.add(baseMesh);
+    baseMeshRef.current = baseMesh;
+
+
+    // --- 3. Atmosphere ---
+    const atmosGeo = new THREE.SphereGeometry(21.5, 64, 64);
+    const atmosMat = new THREE.ShaderMaterial({
+      vertexShader: ATMOSPHERE_VERTEX,
+      fragmentShader: ATMOSPHERE_FRAGMENT,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      transparent: true
+    });
+    scene.add(new THREE.Mesh(atmosGeo, atmosMat));
+
+
+    // --- Map Data Loading ---
+    const textureLoader = new THREE.TextureLoader();
+    const imgLoader = new Image();
+    imgLoader.crossOrigin = "Anonymous";
+    // Load Water/Land mask for Dots (Black=Land, White=Water in this specific map)
+    imgLoader.src = 'https://unpkg.com/three-globe/example/img/earth-water.png';
+
+    imgLoader.onload = () => {
+      // --- Generate Dots ---
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 360;
+      tempCanvas.height = 180;
+      const ctx = tempCanvas.getContext('2d');
+      if (ctx) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(imgLoader, 0, 0, 360, 180);
+        const imgData = ctx.getImageData(0, 0, 360, 180).data;
+        const activeLatLon: { [key: number]: number[] } = {};
+
+
+        // Parse image data
+        for (let i = 0, lon = -180, lat = 90; i < imgData.length; i += 4, lon++) {
+          if (!activeLatLon[lat]) activeLatLon[lat] = [];
+          // Check Red channel. < 100 means dark (Land)
+          if (imgData[i] < 100) activeLatLon[lat].push(lon);
+          if (lon === 180) { lon = -180; lat--; }
+        }
+
+
+        // Create Dot Meshes
+        const dotSphereRadius = 20.2;
+        const dotDensity = 2.5;
+
+
+        for (let lat = 90, i = 0; lat > -90; lat--, i++) {
+          const r = Math.cos(Math.abs(lat) * (Math.PI / 180)) * dotSphereRadius;
+          const circumference = r * Math.PI * 2;
+          const dotsForLat = circumference * dotDensity;
+
+          if (!activeLatLon[lat]) continue;
+
+
+          for (let x = 0; x < dotsForLat; x++) {
+            const long = -180 + x * 360 / dotsForLat;
+            const closest = activeLatLon[lat].reduce((prev, curr) =>
+              (Math.abs(curr - long) < Math.abs(prev - long) ? curr : prev), -1000);
+
+            if (Math.abs(long - closest) > 0.6) continue;
+
+
+            const vector = latLonToVector(long, lat, dotSphereRadius);
+            const dotGeo = new THREE.CircleGeometry(0.12, 5);
+            dotGeo.lookAt(vector);
+            dotGeo.translate(vector.x, vector.y, vector.z);
+
+            const m = new THREE.ShaderMaterial({
+              side: THREE.DoubleSide,
+              uniforms: {
+                u_time: { value: i * Math.sin(Math.random()) },
+                u_maxExtrusion: { value: 1.0 },
+                u_focusPoint: { value: new THREE.Vector3(0, 0, 0) },
+                u_hasSelection: { value: 0.0 }
+              },
+              vertexShader: DOT_VERTEX,
+              fragmentShader: DOT_FRAGMENT,
+            });
+            materialsRef.current.push(m);
+            const mesh = new THREE.Mesh(dotGeo, m);
+            scene.add(mesh);
+          }
+        }
+
+
+        // --- Generate Flags ---
+        TOP_MARKETS.forEach(m => {
+          const tex = createParticleTexture(m.flag);
+          const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+          const pos = latLonToVector(m.lon, m.lat, 22.5);
+          const sprite = new THREE.Sprite(mat);
+          sprite.position.copy(pos);
+          sprite.scale.set(3, 3, 3);
+          sprite.userData = { isFlag: true, country: m, position: pos, targetScale: 3 };
+          spritesRef.current.push(sprite);
+          scene.add(sprite);
+        });
+      }
+
+
+      // --- Load Land Mesh (Topology) ---
+      textureLoader.load('https://unpkg.com/three-globe/example/img/earth-topology.png', (mapTex) => {
+        const landGeo = new THREE.SphereGeometry(19.5, 128, 128);
+        const landMat = new THREE.ShaderMaterial({
+          uniforms: {
+            map: { value: mapTex },
+            u_time: { value: 0.0 },
+            u_focusPoint: { value: new THREE.Vector3(0, 0, 0) },
+            u_hasSelection: { value: 0.0 }
+          },
+          vertexShader: LAND_VERTEX,
+          fragmentShader: LAND_FRAGMENT,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        });
+        const landMesh = new THREE.Mesh(landGeo, landMat);
+        scene.add(landMesh);
+        landMeshRef.current = landMesh;
+      });
+    };
+
+
+    // --- Events ---
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    const particleTextures = ['💚', '🎵', '🔥', '✨'].map(createParticleTexture);
+
+
+    const onMouseDown = (e: MouseEvent) => {
+      // FIX: Allow interaction unless clicking specific UI elements
+      const card = document.getElementById('storyCard');
+      if (card?.classList.contains('active') && card.contains(e.target as Node)) return;
+      if (pickerOpenRef.current) return;
+
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+
+
+      const hits = raycaster.intersectObjects(spritesRef.current);
+      if (hits.length > 0) {
+        const sprite = hits[0].object;
+        const data = sprite.userData.country;
+        const pos = sprite.userData.position;
+
+
+        // Gimmick
+        for (let i = 0; i < 15; i++) {
+          const tex = particleTextures[Math.floor(Math.random() * 4)];
+          const pMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
           const p = new THREE.Sprite(pMat);
           p.position.copy(pos);
-          p.position.add(new THREE.Vector3((Math.random()-0.5)*2, (Math.random()-0.5)*2, (Math.random()-0.5)*2));
+          p.position.add(new THREE.Vector3((Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2));
           const scale = 1 + Math.random();
           p.scale.set(scale, scale, scale);
-          const vel = pos.clone().normalize().multiplyScalar(0.2+Math.random()*0.3);
-          vel.add(new THREE.Vector3((Math.random()-0.5)*0.1, (Math.random()-0.5)*0.1, (Math.random()-0.5)*0.1));
+          const vel = pos.clone().normalize().multiplyScalar(0.2 + Math.random() * 0.3);
+          vel.add(new THREE.Vector3((Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1));
           scene.add(p);
-          particlesRef.current.push({ mesh: p, velocity: vel, life: 1.0, decay: 0.01 + Math.random()*0.02 });
-       }
+          particlesRef.current.push({ mesh: p, velocity: vel, life: 1.0, decay: 0.01 + Math.random() * 0.02 });
+        }
 
 
-       // UI + Animation
-       focusMarket(data, pos);
-     } else {
-       // FIX: Close if clicking background
-       if(card?.classList.contains('active')) {
-           targetSelectionVal.current = 0.0;
-           spritesRef.current.forEach(s => s.userData.targetScale = 3);
-           targetLookAt.current = new THREE.Vector3(0,0,0);
-           targetCamPos.current = null;
-           controls.autoRotate = true;
-           setPanelVisible(false);
-       }
-     }
-   };
+        // UI + Animation
+        focusMarket(data, pos);
+      } else {
+        // FIX: Close if clicking background
+        if (card?.classList.contains('active')) {
+          targetSelectionVal.current = 0.0;
+          spritesRef.current.forEach(s => s.userData.targetScale = 3);
+          targetLookAt.current = new THREE.Vector3(0, 0, 0);
+          targetCamPos.current = null;
+          controls.autoRotate = true;
+          setPanelVisible(false);
+        }
+      }
+    };
 
 
-   window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousedown', onMouseDown);
 
 
-   // --- Animation Loop ---
-   const animate = () => {
-     requestAnimationFrame(animate);
-    
-     // 1. Time Uniforms
-     materialsRef.current.forEach(m => m.uniforms.u_time.value += 0.03);
-     if(landMeshRef.current) (landMeshRef.current.material as THREE.ShaderMaterial).uniforms.u_time.value += 0.03;
-    
-     // 2. Selection Uniform Lerp (Native JS lerp)
-     if(baseMeshRef.current) {
-         const currentSel = (baseMeshRef.current.material as THREE.ShaderMaterial).uniforms.u_hasSelection.value;
-         // Simple lerp: current + (target - current) * 0.05
-         const nextSel = currentSel + (targetSelectionVal.current - currentSel) * 0.05;
-        
-         [...materialsRef.current, landMeshRef.current?.material, baseMeshRef.current?.material].forEach((mat: any) => {
-            if(mat && mat.uniforms) mat.uniforms.u_hasSelection.value = nextSel;
-         });
-     }
+    // --- Animation Loop ---
+    const animate = () => {
+      requestAnimationFrame(animate);
+
+      // 1. Time Uniforms
+      materialsRef.current.forEach(m => m.uniforms.u_time.value += 0.03);
+      if (landMeshRef.current) (landMeshRef.current.material as THREE.ShaderMaterial).uniforms.u_time.value += 0.03;
+
+      // 2. Selection Uniform Lerp (Native JS lerp)
+      if (baseMeshRef.current) {
+        const currentSel = (baseMeshRef.current.material as THREE.ShaderMaterial).uniforms.u_hasSelection.value;
+        // Simple lerp: current + (target - current) * 0.05
+        const nextSel = currentSel + (targetSelectionVal.current - currentSel) * 0.05;
+
+        [...materialsRef.current, landMeshRef.current?.material, baseMeshRef.current?.material].forEach((mat: any) => {
+          if (mat && mat.uniforms) mat.uniforms.u_hasSelection.value = nextSel;
+        });
+      }
 
 
-     // 3. Camera Position Lerp
-     if(targetCamPos.current) {
-       camera.position.lerp(targetCamPos.current, 0.05);
-     }
-    
-     // 4. Controls Target Lerp
-     if(targetLookAt.current) {
-       controls.target.lerp(targetLookAt.current, 0.05);
-     }
+      // 3. Camera Position Lerp
+      if (targetCamPos.current) {
+        camera.position.lerp(targetCamPos.current, 0.05);
+      }
+
+      // 4. Controls Target Lerp
+      if (targetLookAt.current) {
+        controls.target.lerp(targetLookAt.current, 0.05);
+      }
 
 
-     // 5. Sprite Scale Lerp
-     spritesRef.current.forEach(s => {
+      // 5. Sprite Scale Lerp
+      spritesRef.current.forEach(s => {
         const t = s.userData.targetScale;
-        s.scale.lerp(new THREE.Vector3(t,t,t), 0.1);
-     });
+        s.scale.lerp(new THREE.Vector3(t, t, t), 0.1);
+      });
 
 
-     // 6. Particles
-     for (let i = particlesRef.current.length - 1; i >= 0; i--) {
-         const p = particlesRef.current[i];
-         p.mesh.position.add(p.velocity);
-         p.life -= p.decay;
-         p.mesh.material.opacity = p.life;
-         if (p.life <= 0) {
-             scene.remove(p.mesh);
-             particlesRef.current.splice(i, 1);
-         }
-     }
+      // 6. Particles
+      for (let i = particlesRef.current.length - 1; i >= 0; i--) {
+        const p = particlesRef.current[i];
+        p.mesh.position.add(p.velocity);
+        p.life -= p.decay;
+        p.mesh.material.opacity = p.life;
+        if (p.life <= 0) {
+          scene.remove(p.mesh);
+          particlesRef.current.splice(i, 1);
+        }
+      }
 
 
-     stars.rotation.y += 0.0003;
-     controls.update();
-     renderer.render(scene, camera);
-   };
-   animate();
+      stars.rotation.y += 0.0003;
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    animate();
 
 
-   const handleResize = () => {
-     camera.aspect = window.innerWidth / window.innerHeight;
-     camera.updateProjectionMatrix();
-     renderer.setSize(window.innerWidth, window.innerHeight);
-   };
-   window.addEventListener('resize', handleResize);
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
 
 
-   return () => {
-     window.removeEventListener('resize', handleResize);
-     window.removeEventListener('mousedown', onMouseDown);
-     renderer.dispose();
-   };
- }, []);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousedown', onMouseDown);
+      renderer.dispose();
+    };
+  }, []);
 
 
- // --- UI Handlers ---
- const closeStory = () => {
-   setPanelVisible(false);
-   controlsRef.current!.autoRotate = true;
-  
-   // Reset Targets
-   targetSelectionVal.current = 0.0;
-   spritesRef.current.forEach(s => s.userData.targetScale = 3);
-   targetLookAt.current = new THREE.Vector3(0,0,0);
-   // Don't set camera pos target, just let orbit controls take over
-   targetCamPos.current = null;
- };
+  // --- UI Handlers ---
+  const closeStory = () => {
+    setPanelVisible(false);
+    controlsRef.current!.autoRotate = true;
 
- const focusMarket = (market: Market, anchorPos?: THREE.Vector3) => {
-   const focusPos = anchorPos ? anchorPos.clone() : latLonToVector(market.lon, market.lat, 22.5);
+    // Reset Targets
+    targetSelectionVal.current = 0.0;
+    spritesRef.current.forEach(s => s.userData.targetScale = 3);
+    targetLookAt.current = new THREE.Vector3(0, 0, 0);
+    // Don't set camera pos target, just let orbit controls take over
+    targetCamPos.current = null;
+  };
 
-   [...materialsRef.current, landMeshRef.current?.material, baseMeshRef.current?.material].forEach((mat: any) => {
-     if(mat && mat.uniforms?.u_focusPoint) {
-       mat.uniforms.u_focusPoint.value.copy(focusPos);
-     }
-   });
-   targetSelectionVal.current = 1.0;
+  const focusMarket = (market: Market, anchorPos?: THREE.Vector3) => {
+    const focusPos = anchorPos ? anchorPos.clone() : latLonToVector(market.lon, market.lat, 22.5);
 
-   spritesRef.current.forEach(s => {
-     const isTarget = s.userData.country?.name === market.name;
-     s.userData.targetScale = isTarget ? 6 : 3;
-   });
+    [...materialsRef.current, landMeshRef.current?.material, baseMeshRef.current?.material].forEach((mat: any) => {
+      if (mat && mat.uniforms?.u_focusPoint) {
+        mat.uniforms.u_focusPoint.value.copy(focusPos);
+      }
+    });
+    targetSelectionVal.current = 1.0;
 
-   const controls = controlsRef.current;
-   const camera = cameraRef.current;
-   if (controls && camera) {
-     controls.autoRotate = false;
-     const dist = camera.position.length();
-     const idealPos = focusPos.clone().normalize().multiplyScalar(dist);
-     const finalPos = idealPos.clone();
-     const finalTarget = new THREE.Vector3(0,0,0);
-   
-     if(window.innerWidth > 1000) {
-        const viewDir = new THREE.Vector3().subVectors(new THREE.Vector3(0,0,0), idealPos).normalize();
+    spritesRef.current.forEach(s => {
+      const isTarget = s.userData.country?.name === market.name;
+      s.userData.targetScale = isTarget ? 6 : 3;
+    });
+
+    const controls = controlsRef.current;
+    const camera = cameraRef.current;
+    if (controls && camera) {
+      controls.autoRotate = false;
+      const dist = camera.position.length();
+      const idealPos = focusPos.clone().normalize().multiplyScalar(dist);
+      const finalPos = idealPos.clone();
+      const finalTarget = new THREE.Vector3(0, 0, 0);
+
+      if (window.innerWidth > 1000) {
+        const viewDir = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), idealPos).normalize();
         const rightVec = new THREE.Vector3().crossVectors(viewDir, camera.up).normalize();
         const shift = rightVec.multiplyScalar(25);
         finalPos.add(shift);
         finalTarget.add(shift);
-     }
-   
-     targetCamPos.current = finalPos;
-     targetLookAt.current = finalTarget;
-   }
+      }
 
-   setStoryData(market);
-   setCurrentTrackIndex(0);
-   setPanelVisible(true);
-   setPickerOpen(false);
- };
+      targetCamPos.current = finalPos;
+      targetLookAt.current = finalTarget;
+    }
 
-
- const nextTrack = (e: React.MouseEvent) => {
-   e.stopPropagation();
-   if(storyData && currentTrackIndex < storyData.tracks.length - 1) {
-     setCurrentTrackIndex(p => p + 1);
-   } else {
-     closeStory();
-   }
- };
+    setStoryData(market);
+    setCurrentTrackIndex(0);
+    setPanelVisible(true);
+    setPickerOpen(false);
+  };
 
 
- const prevTrack = (e: React.MouseEvent) => {
-   e.stopPropagation();
-   if(currentTrackIndex > 0) setCurrentTrackIndex(p => p - 1);
- };
-
- const handleIntroStart = () => {
-   if (audioUnlocked) {
-     setIntroVisible(false);
-     return;
-   }
-
-   const audio = audioRef.current;
-   if (!audio) return;
-
-   audio.play()
-     .then(() => {
-       audio.muted = false;
-       setAudioUnlocked(true);
-       fadeAudioTo(BASE_AUDIO_VOLUME, 700);
-       setIntroVisible(false);
-     })
-     .catch(() => {});
- };
+  const nextTrack = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (storyData && currentTrackIndex < storyData.tracks.length - 1) {
+      setCurrentTrackIndex(p => p + 1);
+    } else {
+      closeStory();
+    }
+  };
 
 
- return (
+  const prevTrack = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentTrackIndex > 0) setCurrentTrackIndex(p => p - 1);
+  };
+
+  const handleIntroStart = () => {
+    if (audioUnlocked) {
+      setIntroVisible(false);
+      return;
+    }
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.play()
+      .then(() => {
+        audio.muted = false;
+        setAudioUnlocked(true);
+        fadeAudioTo(BASE_AUDIO_VOLUME, 700);
+        setIntroVisible(false);
+      })
+      .catch(() => { });
+  };
+
+
+  return (
     <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', background: 'radial-gradient(circle at 50% 50%, #1a1a2e 0%, #16213e 40%, #0f0f1a 100%)', color: 'white', fontFamily: 'sans-serif' }}>
-     <div className={`intro-overlay ${introVisible ? 'show' : 'hide'}`}>
-       <div className="intro-noise" aria-hidden="true" />
-       <div className="intro-content">
-         <div className="intro-glitch" aria-hidden="true">Listen to the world</div>
-         <div className="intro-title">Listen to the world</div>
-         <button className="intro-button" onClick={handleIntroStart} type="button">
-           <span className="intro-arrow">➜</span>
-         </button>
-       </div>
-     </div>
-     <canvas ref={canvasRef} style={{ display: 'block' }} />
-    
-     {!introVisible && (
-       <button className="country-trigger" onClick={() => setPickerOpen(true)} type="button">
-         <span className="country-trigger__emoji">🌍</span>
-         <span className="country-trigger__label">Select a country</span>
-       </button>
-     )}
-    
-     {/* Instructions */}
-     <div style={{ position: 'absolute', top: 20, width: '100%', textAlign: 'center', color: 'rgba(255,255,255,0.5)', pointerEvents: 'none', letterSpacing: 1, textTransform: 'uppercase', fontSize: '0.9rem' }}>
-       Click a flag to view trending stories
-     </div>
+      <div className={`intro-overlay ${introVisible ? 'show' : 'hide'}`}>
+        <div className="intro-noise" aria-hidden="true" />
+        <div className="intro-content">
+          <div className="intro-glitch" aria-hidden="true">Listen to the world</div>
+          <div className="intro-title">Listen to the world</div>
+          <button className="intro-button" onClick={handleIntroStart} type="button">
+            <span className="intro-arrow">➜</span>
+          </button>
+        </div>
+      </div>
+      <canvas ref={canvasRef} style={{ display: 'block' }} />
+
+      {!introVisible && (
+        <button className="country-trigger" onClick={() => setPickerOpen(true)} type="button">
+          <span className="country-trigger__emoji">🌍</span>
+          <span className="country-trigger__label">Select a country</span>
+        </button>
+      )}
+
+      {/* Instructions */}
+      <div style={{ position: 'absolute', top: 20, width: '100%', textAlign: 'center', color: 'rgba(255,255,255,0.5)', pointerEvents: 'none', letterSpacing: 1, textTransform: 'uppercase', fontSize: '0.9rem' }}>
+        Click a flag to view trending stories
+      </div>
 
 
-     {/* Story Card */}
-     <div
-       id="storyCard"
-       className={panelVisible ? 'active' : ''}
-       style={{
-         position: 'absolute', top: '50%', right: '5%', transform: panelVisible ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(50px)',
-         width: 320, height: 580, background: 'linear-gradient(135deg, rgba(10,10,10,0.95) 0%, rgba(30,30,30,0.95) 100%)',
-         backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16,
-         boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-         opacity: panelVisible ? 1 : 0, visibility: panelVisible ? 'visible' : 'hidden',
-         display: 'flex', flexDirection: 'column', overflow: 'hidden', userSelect: 'none'
-       }}
-     >
-       {/* Progress Bars */}
-       <div style={{ display: 'flex', gap: 4, padding: '12px 12px 0 12px' }}>
-         {storyData?.tracks.map((_, i) => (
-           <div key={i} style={{ flex: 1, height: 2, background: 'rgba(255,255,255,0.3)', borderRadius: 2 }}>
-             <div style={{ height: '100%', width: i <= currentTrackIndex ? '100%' : '0%', background: i === currentTrackIndex ? '#1DB954' : 'white', transition: 'width 0.1s linear' }} />
-           </div>
-         ))}
-       </div>
+      {/* Story Card */}
+      <div
+        id="storyCard"
+        className={panelVisible ? 'active' : ''}
+        style={{
+          position: 'absolute', top: '50%', right: '5%', transform: panelVisible ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(50px)',
+          width: 320, height: 580, background: 'linear-gradient(135deg, rgba(10,10,10,0.95) 0%, rgba(30,30,30,0.95) 100%)',
+          backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16,
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+          opacity: panelVisible ? 1 : 0, visibility: panelVisible ? 'visible' : 'hidden',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden', userSelect: 'none'
+        }}
+      >
+        {/* Progress Bars */}
+        <div style={{ display: 'flex', gap: 4, padding: '12px 12px 0 12px' }}>
+          {storyData?.tracks.map((_, i) => (
+            <div key={i} style={{ flex: 1, height: 2, background: 'rgba(255,255,255,0.3)', borderRadius: 2 }}>
+              <div style={{ height: '100%', width: i <= currentTrackIndex ? '100%' : '0%', background: i === currentTrackIndex ? '#1DB954' : 'white', transition: 'width 0.1s linear' }} />
+            </div>
+          ))}
+        </div>
 
 
-       {/* Header */}
-       <div style={{ display: 'flex', alignItems: 'center', padding: 12, zIndex: 10 }}>
-         <span style={{ fontSize: 24, marginRight: 10 }}>{storyData?.flag}</span>
-         <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{storyData?.name}</span>
-         <button onClick={closeStory} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer', opacity: 0.7 }}>×</button>
-       </div>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: 12, zIndex: 10 }}>
+          <span style={{ fontSize: 24, marginRight: 10 }}>{storyData?.flag}</span>
+          <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{storyData?.name}</span>
+          <button onClick={closeStory} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer', opacity: 0.7 }}>×</button>
+        </div>
 
 
-       {/* Content */}
-       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 30, position: 'relative', zIndex: 5, background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%)' }}>
-        <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', fontSize: 120, opacity: 0.1, filter: 'blur(2px)', zIndex: 1 }}>🎵</div>
+        {/* Content */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 30, position: 'relative', zIndex: 5, background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%)' }}>
+          <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', fontSize: 120, opacity: 0.1, filter: 'blur(2px)', zIndex: 1 }}>🎵</div>
 
-         <div style={{ background: '#1DB954', color: 'black', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px 8px', borderRadius: 4, alignSelf: 'flex-start', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1, zIndex: 2 }}>
-           Trending #{currentTrackIndex + 1}
-         </div>
-         <div className="story-caption" style={{ marginBottom: 16, zIndex: 2 }}>
-           <span className="story-caption__signal" aria-hidden="true" />
-           <span className="story-caption__text">{displayedStory || storyData?.tracks[currentTrackIndex].story}</span>
-         </div>
-         <div style={{ fontSize: '0.8rem', letterSpacing: 0.5, textTransform: 'uppercase', opacity: 0.7, marginBottom: 6, zIndex: 2 }}>
-           Track details
-         </div>
-         <div style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.1, marginBottom: 8, textShadow: '0 2px 4px rgba(0,0,0,0.5)', zIndex: 2 }}>
-           {storyData?.tracks[currentTrackIndex].song}
-         </div>
-         <div style={{ fontSize: '1.1rem', opacity: 0.9, marginBottom: 6, fontWeight: 500, zIndex: 2 }}>
-           {storyData?.tracks[currentTrackIndex].artist}
-         </div>
-       </div>
+          <div style={{ background: '#1DB954', color: 'black', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px 8px', borderRadius: 4, alignSelf: 'flex-start', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1, zIndex: 2 }}>
+            Trending #{currentTrackIndex + 1}
+          </div>
+          <div className="story-caption" style={{ marginBottom: 16, zIndex: 2 }}>
+            <span className="story-caption__signal" aria-hidden="true" />
+            <span className="story-caption__text">{displayedStory || storyData?.tracks[currentTrackIndex].story}</span>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.1, marginBottom: 8, textShadow: '0 2px 4px rgba(0,0,0,0.5)', zIndex: 2 }}>
+            {storyData?.tracks[currentTrackIndex].song}
+          </div>
+          <div style={{ fontSize: '1.1rem', opacity: 0.9, marginBottom: 6, fontWeight: 500, zIndex: 2 }}>
+            {storyData?.tracks[currentTrackIndex].artist}
+          </div>
+        </div>
 
 
-      {/* Tap Zones */}
-      <div onClick={prevTrack} style={{ position: 'absolute', top: 0, left: 0, width: '30%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
-      <div onClick={nextTrack} style={{ position: 'absolute', top: 0, right: 0, width: '70%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
-     </div>
+        {/* Tap Zones */}
+        <div onClick={prevTrack} style={{ position: 'absolute', top: 0, left: 0, width: '30%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
+        <div onClick={nextTrack} style={{ position: 'absolute', top: 0, right: 0, width: '70%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
+      </div>
 
-     {pickerOpen && (
-       <div className="country-picker" role="dialog" aria-modal="true" onClick={() => setPickerOpen(false)}>
-         <div className="country-picker__panel" onClick={(e) => e.stopPropagation()}>
-           <div className="country-picker__header">
-             <div className="country-picker__title">🌍 Select a country</div>
-             <button className="country-picker__close" type="button" onClick={() => setPickerOpen(false)}>×</button>
-           </div>
-           <div className="country-picker__hint">Choose a market to jump straight into its story.</div>
-           <div className="country-picker__list">
-             {TOP_MARKETS.map((market) => (
-               <button
-                 key={market.name}
-                 className="country-picker__item"
-                 type="button"
-                 onClick={() => focusMarket(market)}
-               >
-                 <span className="country-picker__flag">{market.flag}</span>
-                 <span className="country-picker__name">{market.name}</span>
-               </button>
-             ))}
-           </div>
-         </div>
-       </div>
-     )}
-   </div>
- );
+      {pickerOpen && (
+        <div className="country-picker" role="dialog" aria-modal="true" onClick={() => setPickerOpen(false)}>
+          <div className="country-picker__panel" onClick={(e) => e.stopPropagation()}>
+            <div className="country-picker__header">
+              <div className="country-picker__title">🌍 Select a country</div>
+              <button className="country-picker__close" type="button" onClick={() => setPickerOpen(false)}>×</button>
+            </div>
+            <div className="country-picker__hint">Choose a market to jump straight into its story.</div>
+            <div className="country-picker__list">
+              {TOP_MARKETS.map((market) => (
+                <button
+                  key={market.name}
+                  className="country-picker__item"
+                  type="button"
+                  onClick={() => focusMarket(market)}
+                >
+                  <span className="country-picker__flag">{market.flag}</span>
+                  <span className="country-picker__name">{market.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
