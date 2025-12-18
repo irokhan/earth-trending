@@ -426,18 +426,32 @@ export default function App() {
   const audio = new Audio(earthSound);
   audio.loop = true;
   audio.volume = 0;
+  audio.muted = true; // allow autoplay in browsers that block sound until interaction
   audioRef.current = audio;
 
-   fadeAudioTo(BASE_AUDIO_VOLUME, 700);
+   const startPlayback = () => {
+     audio.play()
+       .then(() => {
+         audio.muted = false;
+         fadeAudioTo(BASE_AUDIO_VOLUME, 700);
+       })
+       .catch(() => {
+         // Fallback: wait for a user gesture
+         window.addEventListener('pointerdown', unlockAudio);
+         window.addEventListener('touchstart', unlockAudio);
+       });
+   };
 
    const unlockAudio = () => {
-     audio.play().catch(() => {});
+     audio.play().then(() => {
+       audio.muted = false;
+       fadeAudioTo(BASE_AUDIO_VOLUME, 700);
+     }).catch(() => {});
      window.removeEventListener('pointerdown', unlockAudio);
      window.removeEventListener('touchstart', unlockAudio);
    };
 
-   window.addEventListener('pointerdown', unlockAudio);
-   window.addEventListener('touchstart', unlockAudio);
+   startPlayback();
 
    return () => {
      if (fadeReqRef.current) cancelAnimationFrame(fadeReqRef.current);
