@@ -878,10 +878,9 @@ export default function App() {
        <div className="intro-content">
          <div className="intro-glitch" aria-hidden="true">Listen to the world</div>
          <div className="intro-title">Listen to the world</div>
-         <p className="intro-subtitle">Signal locked. Tap to tune into the planet&apos;s pulse.</p>
-        <button className="intro-button" onClick={handleIntroStart} type="button">
-          <span className="intro-arrow">➜</span>
-        </button>
+         <button className="intro-button" onClick={handleIntroStart} type="button">
+           <span className="intro-arrow">➜</span>
+         </button>
        </div>
      </div>
      <canvas ref={canvasRef} style={{ display: 'block' }} />
