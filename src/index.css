@@ -83,6 +83,7 @@ a {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   text-shadow: 0 0 20px rgba(0, 255, 255, 0.35);
+  white-space: nowrap;
 }
 
 .intro-glitch {
@@ -98,13 +99,7 @@ a {
   filter: blur(1px);
   animation: glitch 1.2s infinite;
   opacity: 0.7;
-}
-
-.intro-subtitle {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.75);
-  letter-spacing: 0.05em;
-  font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .intro-button {
@@ -115,7 +110,7 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: radial-gradient(circle at 30% 30%, rgba(0, 255, 255, 0.4), rgba(255, 0, 180, 0.45));
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.35), 0 15px 30px rgba(0, 0, 0, 0.45);
-  color: #0a0a0a;
+  color: #ffffff;
   display: grid;
   place-items: center;
   cursor: pointer;
