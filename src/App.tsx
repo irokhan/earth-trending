@@ -259,6 +259,16 @@ const createParticleTexture = (emoji: string): THREE.Texture => {
  return tex;
 };
 
+const latLonToVector = (lon: number, lat: number, radius: number) => {
+ const phi = (90 - lat) * (Math.PI / 180);
+ const theta = (lon + 180) * (Math.PI / 180);
+ return new THREE.Vector3(
+   -(radius * Math.sin(phi) * Math.cos(theta)),
+   radius * Math.cos(phi),
+   radius * Math.sin(phi) * Math.sin(theta)
+ );
+};
+
 
 // --- Data ---
 const MARKET_LIST = [
@@ -372,8 +382,10 @@ export default function App() {
  const [panelVisible, setPanelVisible] = useState(false);
  const [introVisible, setIntroVisible] = useState(true);
  const [audioUnlocked, setAudioUnlocked] = useState(false);
+ const [pickerOpen, setPickerOpen] = useState(false);
  const audioRef = useRef<HTMLAudioElement | null>(null);
  const fadeReqRef = useRef<number | null>(null);
+ const pickerOpenRef = useRef(false);
 
 
  // --- Animation Refs ---
@@ -436,6 +448,10 @@ export default function App() {
      audio.pause();
    };
  }, []);
+
+ useEffect(() => {
+   pickerOpenRef.current = pickerOpen;
+ }, [pickerOpen]);
 
  useEffect(() => {
    if (!audioUnlocked) return;
@@ -565,15 +581,6 @@ export default function App() {
            // Create Dot Meshes
            const dotSphereRadius = 20.2;
            const dotDensity = 2.5;
-           const calcPos = (lon: number, lat: number, r: number) => {
-               const phi = (90 - lat) * (Math.PI / 180);
-               const theta = (lon + 180) * (Math.PI / 180);
-               return new THREE.Vector3(
-                   -(r * Math.sin(phi) * Math.cos(theta)),
-                   r * Math.cos(phi),
-                   r * Math.sin(phi) * Math.sin(theta)
-               );
-           };
 
 
            for (let lat = 90, i = 0; lat > -90; lat--, i++) {
@@ -592,7 +599,7 @@ export default function App() {
                    if(Math.abs(long - closest) > 0.6) continue;
 
 
-                   const vector = calcPos(long, lat, dotSphereRadius);
+                   const vector = latLonToVector(long, lat, dotSphereRadius);
                    const dotGeo = new THREE.CircleGeometry(0.12, 5);
                    dotGeo.lookAt(vector);
                    dotGeo.translate(vector.x, vector.y, vector.z);
@@ -619,7 +626,7 @@ export default function App() {
            TOP_MARKETS.forEach(m => {
                const tex = createParticleTexture(m.flag);
                const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-               const pos = calcPos(m.lon, m.lat, 22.5);
+               const pos = latLonToVector(m.lon, m.lat, 22.5);
                const sprite = new THREE.Sprite(mat);
                sprite.position.copy(pos);
                sprite.scale.set(3,3,3);
@@ -663,6 +670,7 @@ export default function App() {
      // FIX: Allow interaction unless clicking specific UI elements
      const card = document.getElementById('storyCard');
      if(card?.classList.contains('active') && card.contains(e.target as Node)) return;
+     if (pickerOpenRef.current) return;
 
 
      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -693,44 +701,8 @@ export default function App() {
        }
 
 
-       // --- Set Animation Targets ---
-       spritesRef.current.forEach(s => {
-          s.userData.targetScale = (s === sprite) ? 6 : 3;
-       });
-
-
-       // Set Focus Point
-       [...materialsRef.current, landMeshRef.current?.material, baseMeshRef.current?.material].forEach((mat: any) => {
-          if(mat && mat.uniforms) {
-            mat.uniforms.u_focusPoint.value.copy(pos);
-          }
-       });
-       targetSelectionVal.current = 1.0;
-
-
-       // Set Camera Targets
-       controls.autoRotate = false;
-       const dist = camera.position.length();
-       const idealPos = pos.clone().normalize().multiplyScalar(dist);
-       const finalPos = idealPos.clone();
-       const finalTarget = new THREE.Vector3(0,0,0);
-      
-       if(window.innerWidth > 1000) {
-          const viewDir = new THREE.Vector3().subVectors(new THREE.Vector3(0,0,0), idealPos).normalize();
-          const rightVec = new THREE.Vector3().crossVectors(viewDir, camera.up).normalize();
-          const shift = rightVec.multiplyScalar(25);
-          finalPos.add(shift);
-          finalTarget.add(shift);
-       }
-      
-       targetCamPos.current = finalPos;
-       targetLookAt.current = finalTarget;
-
-
-       // UI
-       setStoryData(data);
-       setCurrentTrackIndex(0);
-       setPanelVisible(true);
+       // UI + Animation
+       focusMarket(data, pos);
      } else {
        // FIX: Close if clicking background
        if(card?.classList.contains('active')) {
@@ -835,6 +807,48 @@ export default function App() {
    targetCamPos.current = null;
  };
 
+ const focusMarket = (market: Market, anchorPos?: THREE.Vector3) => {
+   const focusPos = anchorPos ? anchorPos.clone() : latLonToVector(market.lon, market.lat, 22.5);
+
+   [...materialsRef.current, landMeshRef.current?.material, baseMeshRef.current?.material].forEach((mat: any) => {
+     if(mat && mat.uniforms?.u_focusPoint) {
+       mat.uniforms.u_focusPoint.value.copy(focusPos);
+     }
+   });
+   targetSelectionVal.current = 1.0;
+
+   spritesRef.current.forEach(s => {
+     const isTarget = s.userData.country?.name === market.name;
+     s.userData.targetScale = isTarget ? 6 : 3;
+   });
+
+   const controls = controlsRef.current;
+   const camera = cameraRef.current;
+   if (controls && camera) {
+     controls.autoRotate = false;
+     const dist = camera.position.length();
+     const idealPos = focusPos.clone().normalize().multiplyScalar(dist);
+     const finalPos = idealPos.clone();
+     const finalTarget = new THREE.Vector3(0,0,0);
+   
+     if(window.innerWidth > 1000) {
+        const viewDir = new THREE.Vector3().subVectors(new THREE.Vector3(0,0,0), idealPos).normalize();
+        const rightVec = new THREE.Vector3().crossVectors(viewDir, camera.up).normalize();
+        const shift = rightVec.multiplyScalar(25);
+        finalPos.add(shift);
+        finalTarget.add(shift);
+     }
+   
+     targetCamPos.current = finalPos;
+     targetLookAt.current = finalTarget;
+   }
+
+   setStoryData(market);
+   setCurrentTrackIndex(0);
+   setPanelVisible(true);
+   setPickerOpen(false);
+ };
+
 
  const nextTrack = (e: React.MouseEvent) => {
    e.stopPropagation();
@@ -884,6 +898,13 @@ export default function App() {
        </div>
      </div>
      <canvas ref={canvasRef} style={{ display: 'block' }} />
+    
+     {!introVisible && (
+       <button className="country-trigger" onClick={() => setPickerOpen(true)} type="button">
+         <span className="country-trigger__emoji">🌍</span>
+         <span className="country-trigger__label">Select a country</span>
+       </button>
+     )}
     
      {/* Instructions */}
      <div style={{ position: 'absolute', top: 20, width: '100%', textAlign: 'center', color: 'rgba(255,255,255,0.5)', pointerEvents: 'none', letterSpacing: 1, textTransform: 'uppercase', fontSize: '0.9rem' }}>
@@ -941,10 +962,35 @@ export default function App() {
        </div>
 
 
-       {/* Tap Zones */}
-       <div onClick={prevTrack} style={{ position: 'absolute', top: 0, left: 0, width: '30%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
-       <div onClick={nextTrack} style={{ position: 'absolute', top: 0, right: 0, width: '70%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
+      {/* Tap Zones */}
+      <div onClick={prevTrack} style={{ position: 'absolute', top: 0, left: 0, width: '30%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
+      <div onClick={nextTrack} style={{ position: 'absolute', top: 0, right: 0, width: '70%', height: '100%', zIndex: 20, cursor: 'pointer' }} />
      </div>
+
+     {pickerOpen && (
+       <div className="country-picker" role="dialog" aria-modal="true" onClick={() => setPickerOpen(false)}>
+         <div className="country-picker__panel" onClick={(e) => e.stopPropagation()}>
+           <div className="country-picker__header">
+             <div className="country-picker__title">🌍 Select a country</div>
+             <button className="country-picker__close" type="button" onClick={() => setPickerOpen(false)}>×</button>
+           </div>
+           <div className="country-picker__hint">Choose a market to jump straight into its story.</div>
+           <div className="country-picker__list">
+             {TOP_MARKETS.map((market) => (
+               <button
+                 key={market.name}
+                 className="country-picker__item"
+                 type="button"
+                 onClick={() => focusMarket(market)}
+               >
+                 <span className="country-picker__flag">{market.flag}</span>
+                 <span className="country-picker__name">{market.name}</span>
+               </button>
+             ))}
+           </div>
+         </div>
+       </div>
+     )}
    </div>
  );
 }
